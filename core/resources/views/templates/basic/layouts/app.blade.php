@@ -32,13 +32,6 @@
         </div>
     </div>
 
-    <!-- scroll-to-top start -->
-    <div class="scroll-to-top">
-        <span class="scroll-icon">
-            <i class="las la-chevron-up"></i>
-        </span>
-    </div>
-
     <div class="body-overlay"></div>
     @yield('panel')
 
