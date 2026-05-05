@@ -23,6 +23,10 @@
                 margin-bottom: 18px;
             }
 
+            .auth-topbar--end {
+                justify-content: flex-end;
+            }
+
             .auth-back {
                 display: inline-flex;
                 align-items: center;

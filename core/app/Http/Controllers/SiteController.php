@@ -24,12 +24,15 @@ class SiteController extends Controller
             session()->put('reference', $reference);
         }
 
-        $pageTitle   = 'Home';
-        $sections    = Page::where('tempname', activeTemplate())->where('slug', '/')->first();
-        $seoContents = $sections->seo_content;
-        $seoImage    = @$seoContents->image ? getImage(getFilePath('seo') . '/' . @$seoContents->image, getFileSize('seo')) : null;
+        if (auth('admin')->check()) {
+            return to_route('admin.dashboard');
+        }
 
-        return view('Template::home', compact('pageTitle', 'sections', 'seoContents', 'seoImage'));
+        if (auth()->check()) {
+            return to_route('user.home');
+        }
+
+        return to_route('user.login');
     }
 
     public function pages($slug)

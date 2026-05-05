@@ -5,10 +5,7 @@
 @section('content')
     <div class="auth-surface">
         <div class="auth-shell">
-            <div class="auth-topbar">
-                <a class="auth-back" href="{{ route('home') }}" aria-label="@lang('Back to home')">
-                    <i class="las la-arrow-left"></i>
-                </a>
+            <div class="auth-topbar auth-topbar--end">
                 <a class="auth-link" href="{{ route('user.register') }}">@lang('Create account')</a>
             </div>
 
