@@ -1,0 +1,34 @@
+FROM php:8.3-apache
+
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libonig-dev \
+    libpng-dev \
+    libxml2-dev \
+    libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" bcmath dom gd mbstring opcache pdo_mysql xml zip \
+    && a2enmod rewrite headers expires \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+RUN sed -ri 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+WORKDIR /var/www/html
+
+COPY . /var/www/html
+COPY deploy/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
+COPY deploy/entrypoint.prod.sh /usr/local/bin/toapp-entrypoint
+
+RUN chmod +x /usr/local/bin/toapp-entrypoint \
+    && mkdir -p core/storage/framework/cache/data core/storage/framework/sessions core/storage/framework/views core/storage/logs core/bootstrap/cache \
+    && cd core \
+    && composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader \
+    && chown -R www-data:www-data /var/www/html/core/storage /var/www/html/core/bootstrap/cache
+
+ENTRYPOINT ["toapp-entrypoint"]
+CMD ["apache2-foreground"]

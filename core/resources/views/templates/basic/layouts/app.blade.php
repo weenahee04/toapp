@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="{{ config('app.locale') }}" itemscope itemtype="http://schema.org/WebPage">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title> {{ gs()->siteName(__($pageTitle)) }}</title>
+    @include('partials.seo')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  
+<title>To APP</title>  
+  
+<link href="{{ asset('assets/global/css/bootstrap/bootstrap.min.css')}}" rel="stylesheet">     
+<link href="{{ asset('assets/global/css/aos.css')}}" rel="stylesheet">     
+<link href="{{ asset('assets/global/css/jquery.fancybox.css')}}" rel="stylesheet">    
+<link href="{{ asset('assets/global/css/jquery.scrollbar.css')}}" rel="stylesheet">
+<link href="{{ asset('assets/global/css/line-awesome.min.css')}}" rel="stylesheet">
+<link href="{{ asset('assets/global/css/global.css')}}" rel="stylesheet">
+    @stack('style-lib')
+    @stack('style')
+   
+</head>
+@php echo loadExtension('google-analytics') @endphp
+
+<body>
+
+    <div class="preloader">
+        <div class="preloader-container">
+            <span class="animated-preloader"></span>
+        </div>
+    </div>
+
+    <!-- scroll-to-top start -->
+    <div class="scroll-to-top">
+        <span class="scroll-icon">
+            <i class="las la-chevron-up"></i>
+        </span>
+    </div>
+
+    <div class="body-overlay"></div>
+    @yield('panel')
+
+    @auth
+        @if (request()->routeIs('user.*') || request()->routeIs('ticket.*'))
+            @include($activeTemplate . 'partials.footer')
+        @endif
+    @endauth
+
+   
+    <script src="{{ asset('assets/global/js/jquery-3.4.1.min.js ') }}"></script>  
+<script src="{{ asset('assets/global/js/bootstrap/popper.min.js ') }}"></script>
+<script src="{{ asset('assets/global/js/bootstrap/bootstrap.min.js ') }}"></script>    
+<script src="{{ asset('assets/global/js/jquery.fancybox.js ') }}"></script> 
+<script src="{{ asset('assets/global/js/aos.js ') }}"></script>       
+<script src="{{ asset('assets/global/js/jquery.scrollbar.js ') }}"></script> 
+<script src="{{ asset('assets/global/js/custom.js ') }}"></script>    
+
+    @stack('script-lib')
+    @php echo loadExtension('tawk-chat') @endphp
+    @include('partials.notify')
+
+    @if (gs('pn'))
+        @include('partials.push_script')
+    @endif
+    @stack('script')
+    <script>
+        (function($) {
+            "use strict";
+            $(".langSel").on("change", function() {
+                window.location.href = "{{ route('home') }}/change/" + $(this).val();
+            });
+
+            var inputElements = $('[type=text],select,textarea');
+            $.each(inputElements, function(index, element) {
+                element = $(element);
+                element.closest('.form-group').find('label').attr('for', element.attr('name'));
+                element.attr('id', element.attr('name'))
+            });
+
+            $.each($('input, select, textarea'), function(i, element) {
+                var elementType = $(element);
+                if (elementType.attr('type') != 'checkbox') {
+                    if (element.hasAttribute('required')) {
+                        $(element).closest('.form-group').find('label').addClass('required');
+                    }
+                }
+            });
+
+            $('.select2').each(function(index, element) {
+                $(element).select2({
+                    minimumResultsForSearch: "-1"
+                });
+            });
+
+            $('.select2-basic').each(function(index, element) {
+                $(element).select2({
+                    dropdownParent: $(element).closest('.select2-parent')
+                });
+            });
+
+            let disableSubmission = false;
+            $('.disableSubmission').on('submit', function(e) {
+                if (disableSubmission) {
+                    e.preventDefault()
+                } else {
+                    disableSubmission = true;
+                }
+            });
+
+        })(jQuery);
+    </script>
+</body>
+
+</html>

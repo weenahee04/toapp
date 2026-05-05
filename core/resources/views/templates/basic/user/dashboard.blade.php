@@ -1,0 +1,221 @@
+@extends($activeTemplate . 'layouts.master')
+
+@section('content')
+    <div class="app-page app-dashboard">
+        <div class="app-container">
+            <div class="app-topbar">
+                <a class="app-brand" href="{{ route('user.home') }}">
+                    <img src="{{ siteLogo() }}" alt="To-app">
+                    <span>To-app</span>
+                </a>
+
+                <a class="app-icon-btn" href="{{ route('user.setting') }}" aria-label="@lang('Open settings')">
+                    <i class="las la-cog"></i>
+                </a>
+            </div>
+
+            <section class="app-hero">
+                <span class="app-eyebrow">
+                    <i class="las la-star"></i>
+                    @lang('Dashboard')
+                </span>
+                <h1>@lang('Hello'), {{ $user->firstname }}</h1>
+                <p>@lang('Track your balance, active plans, payouts, and referral network in one clean workspace.')</p>
+
+                <div class="app-pills">
+                    <span class="app-pill">
+                        <i class="las la-wallet"></i>
+                        @lang('Available') {{ showAmount($user->balance) }}
+                    </span>
+                    <span class="app-pill">
+                        <i class="las la-chart-line"></i>
+                        @lang('Invested') {{ showAmount($totalInvest) }}
+                    </span>
+                </div>
+
+                <div class="app-hero-actions">
+                    <a class="app-btn app-btn-primary" href="{{ route('user.plans') }}">
+                        <i class="las la-layer-group"></i>
+                        @lang('Browse plans')
+                    </a>
+                    <a class="app-btn app-btn-secondary" href="{{ route('user.withdraw.index') }}">
+                        <i class="las la-money-bill-wave"></i>
+                        @lang('Withdraw')
+                    </a>
+                </div>
+            </section>
+
+            <div class="app-section-title">
+                <div>
+                    <h2>@lang('Your snapshot')</h2>
+                    <p>@lang('The numbers that matter most right now.')</p>
+                </div>
+                <a class="app-link" href="{{ route('policy.pages', 'terms-of-service') }}">
+                    @lang('Terms')
+                    <i class="las la-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="row app-grid">
+                <div class="col-6 col-lg-3">
+                    <div class="app-stat" style="--tone: rgba(18, 104, 243, .12); --tone-color: #1268f3;">
+                        <span class="app-stat-icon"><i class="las la-play-circle"></i></span>
+                        <label>@lang('Running plans')</label>
+                        <strong>{{ $runningInvestmentCount }}</strong>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="app-stat" style="--tone: rgba(22, 163, 74, .12); --tone-color: #16a34a;">
+                        <span class="app-stat-icon"><i class="las la-arrow-down"></i></span>
+                        <label>@lang('Deposits')</label>
+                        <strong>{{ showAmount($totalDeposit, 0) }}</strong>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="app-stat" style="--tone: rgba(249, 115, 22, .12); --tone-color: #f97316;">
+                        <span class="app-stat-icon"><i class="las la-arrow-up"></i></span>
+                        <label>@lang('Withdrawn')</label>
+                        <strong>{{ showAmount($totalWithdraw, 0) }}</strong>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="app-stat" style="--tone: rgba(20, 199, 214, .13); --tone-color: #0891b2;">
+                        <span class="app-stat-icon"><i class="las la-users"></i></span>
+                        <label>@lang('Referrals')</label>
+                        <strong>{{ $directReferralCount }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row app-grid mt-1">
+                <div class="col-lg-7">
+                    <div class="app-section-title">
+                        <div>
+                            <h2>@lang('Recent activity')</h2>
+                            <p>@lang('Latest balance movements from your account.')</p>
+                        </div>
+                        <a class="app-link" href="{{ route('user.transactions') }}">
+                            @lang('View all')
+                            <i class="las la-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="app-list-card">
+                        @forelse ($latestTrx->take(4) as $trx)
+                            <div class="app-list-item">
+                                <span class="app-list-icon">
+                                    <i class="las {{ $trx->trx_type == '+' ? 'la-plus' : 'la-minus' }}"></i>
+                                </span>
+                                <div class="app-list-body">
+                                    <strong>{{ $trx->details }}</strong>
+                                    <span>{{ showDateTime($trx->created_at, 'M d, Y h:i A') }}</span>
+                                </div>
+                                <div class="app-amount {{ $trx->trx_type == '+' ? 'is-plus' : 'is-minus' }}">
+                                    {{ $trx->trx_type }}{{ showAmount($trx->amount) }}
+                                </div>
+                            </div>
+                        @empty
+                            <div class="app-empty-state">
+                                <i class="las la-receipt d-block fs-1 mb-2"></i>
+                                @lang('No transactions yet. Your first activity will appear here.')
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="app-section-title">
+                        <div>
+                            <h2>@lang('Account health')</h2>
+                            <p>@lang('Small details that help users know what to do next.')</p>
+                        </div>
+                    </div>
+
+                    <div class="app-list-card mb-3">
+                        <div class="app-list-item">
+                            <span class="app-list-icon"><i class="las la-shield-alt"></i></span>
+                            <div class="app-list-body">
+                                <strong>{{ $runningInvestmentCount > 0 ? __('Active') : __('Inactive') }}</strong>
+                                <span>@lang('Current account status')</span>
+                            </div>
+                        </div>
+
+                        <div class="app-list-item">
+                            <span class="app-list-icon"><i class="las la-calendar-check"></i></span>
+                            <div class="app-list-body">
+                                <strong>{{ $nextReturnDate ? showDateTime($nextReturnDate, 'M d, Y') : __('No active payout') }}</strong>
+                                <span>@lang('Next payout')</span>
+                            </div>
+                        </div>
+
+                        <div class="app-list-item">
+                            <span class="app-list-icon"><i class="las la-user-clock"></i></span>
+                            <div class="app-list-body">
+                                <strong>{{ showDateTime($user->created_at, 'M d, Y') }}</strong>
+                                <span>@lang('Joined us since')</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-card">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="app-list-icon"><i class="las la-share-alt"></i></span>
+                            <div>
+                                <h2 class="mb-1 fs-5 fw-bold">@lang('Referral code')</h2>
+                                <p class="mb-0 text-muted">@lang('Invite friends and track your network from the referral page.')</p>
+                            </div>
+                        </div>
+
+                        <div class="app-copy-box">
+                            <input type="text" value="{{ $referralCode }}" id="referral-code" readonly>
+                            <button class="app-icon-btn" type="button" data-copy-value="{{ $referralCode }}" data-copy-message="@lang('Referral code copied')" aria-label="@lang('Copy referral code')">
+                                <i class="las la-copy"></i>
+                            </button>
+                        </div>
+
+                        <div class="app-hero-actions">
+                            <button class="app-btn app-btn-primary" type="button" id="share-referral-link" data-link="{{ $referralLink }}">
+                                <i class="las la-paper-plane"></i>
+                                @lang('Share link')
+                            </button>
+                            <a class="app-btn app-btn-secondary" href="{{ route('user.referrals') }}">
+                                <i class="las la-network-wired"></i>
+                                @lang('My network')
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('script')
+    <script>
+        (function() {
+            "use strict";
+
+            const shareButton = document.getElementById('share-referral-link');
+
+            shareButton?.addEventListener('click', async function() {
+                const link = this.dataset.link;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: document.title,
+                            url: link,
+                        });
+                    } catch (error) {}
+                    return;
+                }
+
+                await navigator.clipboard.writeText(link);
+                notify('success', 'Referral link copied');
+            });
+        })();
+    </script>
+@endpush
