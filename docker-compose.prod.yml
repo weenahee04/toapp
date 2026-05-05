@@ -1,0 +1,41 @@
+name: toapp-prod
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    ports:
+      - "80:80"
+    volumes:
+      - app_storage:/var/www/html/core/storage
+      - app_cache:/var/www/html/core/bootstrap/cache
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./install/toapp_fresh.sql:/docker-entrypoint-initdb.d/01-toapp_fresh.sql:ro
+
+volumes:
+  app_storage:
+  app_cache:
+  db_data:

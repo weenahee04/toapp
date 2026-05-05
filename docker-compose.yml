@@ -1,0 +1,65 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: toapp-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: toapp
+      DB_USERNAME: toapp
+      DB_PASSWORD: toapp_local_pass
+      CACHE_STORE: array
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: log
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - vendor_data:/var/www/html/core/vendor
+      - composer_cache:/tmp/composer-cache
+    working_dir: /var/www/html
+    command: >
+      bash -lc "
+      mkdir -p core/storage/framework/cache/data core/storage/framework/sessions core/storage/framework/views core/storage/logs core/bootstrap/cache &&
+      cd /var/www/html/core &&
+      if [ ! -f vendor/autoload.php ]; then composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader; fi &&
+      apache2-foreground"
+
+  db:
+    image: mariadb:10.11
+    container_name: toapp-db
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: toapp
+      MYSQL_USER: toapp
+      MYSQL_PASSWORD: toapp_local_pass
+      MYSQL_ROOT_PASSWORD: root_local_pass
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./install/admin_toapp2.sql:/docker-entrypoint-initdb.d/01-admin_toapp2.sql:ro
+
+volumes:
+  db_data:
+  vendor_data:
+  composer_cache:
