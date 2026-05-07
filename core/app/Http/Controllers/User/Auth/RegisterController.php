@@ -57,12 +57,26 @@ class RegisterController extends Controller
         $validate     = Validator::make($data, [
             'firstname' => 'required',
             'lastname'  => 'required',
-            'email'     => 'required|string|email|unique:users'
-           
-           
+            'email'     => 'required|string|email|unique:users',
+            'ref_by'    => [
+                'required',
+                'string',
+                'max:40',
+                function ($attribute, $value, $fail) {
+                    $referralCode = trim($value);
+                    $referralExists = User::where('username', $referralCode)
+                        ->orWhere('refno', $referralCode)
+                        ->exists();
+
+                    if (!$referralExists) {
+                        $fail('Please enter a valid referral code.');
+                    }
+                },
+            ],
         ],[
             'firstname.required'=>'The first name field is required',
-            'lastname.required'=>'The last name field is required'
+            'lastname.required'=>'The last name field is required',
+            'ref_by.required'=>'A referral code is required to create an account',
         ]);
 
         return $validate;
@@ -80,9 +94,8 @@ class RegisterController extends Controller
 
         $request->session()->regenerateToken();
 
-        if ($request->filled('ref_by')) {
-            session()->put('reference', trim($request->ref_by));
-        }
+        $referralCode = trim($request->ref_by);
+        session()->put('reference', $referralCode);
 
        
 
@@ -94,7 +107,7 @@ class RegisterController extends Controller
             'firstname' => $request->firstname,
             'lastname'  => $request->lastname,
             'email'     => $request->email,
-            'ref_by'    => $request->ref_by,
+            'ref_by'    => $referralCode,
             'profile_complete' => 0,
             
         ];

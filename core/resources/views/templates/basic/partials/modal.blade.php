@@ -131,8 +131,15 @@ line-height: normal;">@lang('Login')</button>
                         @if (session()->get('reference') != null)
                             <div class="col-lg-12 mb-3">
                                 <label>@lang('Reference By')</label>
-                                <input type="text" name="referBy" id="referenceBy" class="form--control"
-                                    value="{{ session()->get('reference') }}" readonly>
+                                <input type="text" name="ref_by" id="referenceBy" class="form--control"
+                                    value="{{ session()->get('reference') }}" readonly required>
+                            </div>
+                        @else
+                            <div class="col-lg-12 mb-3">
+                                <label>@lang('Referral Code')</label>
+                                <input type="text" name="ref_by" class="form--control"
+                                    value="{{ old('ref_by') }}" placeholder="@lang('Enter your invitation code')" required>
+                                <small>@lang('A valid referral code is required to create an account.')</small>
                             </div>
                         @endif
 

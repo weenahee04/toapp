@@ -20,7 +20,7 @@
                 <div class="auth-card__header">
                     <span class="auth-eyebrow">@lang('Step 1 of 3')</span>
                     <h1 class="auth-title">@lang('Create your account')</h1>
-                    <p class="auth-copy">@lang('Start with your name and email. We will keep the next steps short and clear.')</p>
+                    <p class="auth-copy">@lang('Start with your name, email, and the referral code you received from an existing member.')</p>
                 </div>
 
                 <div class="auth-card__body">
@@ -87,7 +87,7 @@
                         <div class="auth-field">
                             <div class="auth-label-row">
                                 <label class="auth-label" for="ref_by">@lang('Referral Code')</label>
-                                <span class="auth-optional">@lang('Optional')</span>
+                                <span class="auth-optional">@lang('Required')</span>
                             </div>
                             <input
                                 id="ref_by"
@@ -95,8 +95,10 @@
                                 name="ref_by"
                                 class="auth-control"
                                 value="{{ data_get(session('user_register'), 'ref_by', old('ref_by', session('reference'))) }}"
-                                placeholder="@lang('Enter code if you have one')"
+                                placeholder="@lang('Enter your invitation code')"
+                                required
                             >
+                            <p class="auth-help">@lang('You need a valid referral code from an existing member to create an account.')</p>
                         </div>
 
                         <div class="auth-note">
