@@ -25,7 +25,7 @@ class SiteController extends Controller
         }
 
         if (auth('admin')->check()) {
-            return to_route('admin.dashboard');
+            return to_route('toapp.admin.dashboard');
         }
 
         if (auth()->check()) {

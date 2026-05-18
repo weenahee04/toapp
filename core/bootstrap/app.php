@@ -24,7 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         using:function(){
             Route::middleware(['web'])
-                ->prefix('admin-new')
+                ->get('admin-new/{path?}', function (?string $path = null) {
+                    return redirect('/admin' . ($path ? '/' . $path : ''), 301);
+                })
+                ->where('path', '.*');
+
+            Route::middleware(['web'])
+                ->prefix('admin')
                 ->name('toapp.admin.')
                 ->group(base_path('routes/toapp_admin.php'));
 
@@ -32,7 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 Route::middleware(['web'])
                     ->namespace('Admin')
-                    ->prefix('admin')
+                    ->prefix('legacy-admin')
                     ->name('admin.')
                     ->group(base_path('routes/admin.php'));
 
