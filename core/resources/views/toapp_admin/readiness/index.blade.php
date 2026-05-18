@@ -34,7 +34,7 @@
             <div class="ta-note-card"><strong>1. Set real environment</strong><span>Update domain, database, mail, and payment keys in production env.</span></div>
             <div class="ta-note-card"><strong>2. Review money queues</strong><span>Approve or reject pending deposit and withdrawal requests before launch.</span></div>
             <div class="ta-note-card"><strong>3. Cache safely</strong><span>Run route/config/view cache only after all routes are verified.</span></div>
-            <div class="ta-note-card"><strong>4. Keep old admin off</strong><span>Use /admin-new as the clean backend while we replace old Envato screens.</span></div>
+            <div class="ta-note-card"><strong>4. Keep old admin isolated</strong><span>Use /admin as the clean backend. The old Envato screens stay parked at /legacy-admin only for reference.</span></div>
         </div>
     </aside>
 </section>

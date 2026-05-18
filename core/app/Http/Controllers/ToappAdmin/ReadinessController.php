@@ -22,7 +22,7 @@ class ReadinessController extends Controller
         $general = GeneralSetting::first();
         $checks = [
             $this->check('Database connection', $this->databaseIsReady(), 'Laravel can connect to the active MySQL database.'),
-            $this->check('Admin auth', auth('admin')->check(), 'New admin guard is active for /admin-new.'),
+            $this->check('Admin auth', auth('admin')->check(), 'New admin guard is active for /admin.'),
             $this->check('Site identity', filled($general?->site_name) && filled($general?->cur_text), 'Site name and currency text should be set.'),
             $this->check('Active plans', Plan::where('status', Status::ENABLE)->exists(), 'At least one enabled customer plan is required.'),
             $this->check('Deposit gateway', Gateway::where('status', Status::ENABLE)->exists(), 'At least one active deposit method should be available.'),

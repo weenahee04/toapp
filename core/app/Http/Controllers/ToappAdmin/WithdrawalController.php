@@ -55,6 +55,17 @@ class WithdrawalController extends Controller
         $withdrawal->admin_feedback = $validated['details'] ?? null;
         $withdrawal->save();
 
+        notify($withdrawal->user, 'WITHDRAW_APPROVE', [
+            'method_name' => $withdrawal->method?->name ?? 'Withdrawal method',
+            'method_currency' => $withdrawal->currency,
+            'method_amount' => showAmount($withdrawal->final_amount, currencyFormat: false),
+            'amount' => showAmount($withdrawal->amount, currencyFormat: false),
+            'charge' => showAmount($withdrawal->charge, currencyFormat: false),
+            'rate' => showAmount($withdrawal->rate, currencyFormat: false),
+            'trx' => $withdrawal->trx,
+            'admin_details' => $validated['details'] ?? '',
+        ]);
+
         return back()->with('status', 'Withdrawal approved successfully.');
     }
 
@@ -86,6 +97,20 @@ class WithdrawalController extends Controller
             $transaction->trx = $withdrawal->trx;
             $transaction->save();
         });
+
+        $withdrawal->loadMissing(['user', 'method']);
+
+        notify($withdrawal->user, 'WITHDRAW_REJECT', [
+            'method_name' => $withdrawal->method?->name ?? 'Withdrawal method',
+            'method_currency' => $withdrawal->currency,
+            'method_amount' => showAmount($withdrawal->final_amount, currencyFormat: false),
+            'amount' => showAmount($withdrawal->amount, currencyFormat: false),
+            'charge' => showAmount($withdrawal->charge, currencyFormat: false),
+            'rate' => showAmount($withdrawal->rate, currencyFormat: false),
+            'trx' => $withdrawal->trx,
+            'post_balance' => showAmount($withdrawal->user->balance, currencyFormat: false),
+            'admin_details' => $validated['details'],
+        ]);
 
         return back()->with('status', 'Withdrawal rejected and balance refunded.');
     }

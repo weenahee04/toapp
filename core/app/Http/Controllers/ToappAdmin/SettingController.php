@@ -12,7 +12,7 @@ class SettingController extends Controller
     {
         return view('toapp_admin.settings.edit', [
             'pageTitle' => 'Settings',
-            'settings' => GeneralSetting::first(),
+            'settings' => GeneralSetting::first() ?? $this->defaultSettings(),
         ]);
     }
 
@@ -33,7 +33,7 @@ class SettingController extends Controller
             'secure_password' => ['nullable', 'boolean'],
         ]);
 
-        $settings = GeneralSetting::first();
+        $settings = GeneralSetting::firstOrNew(['id' => 1]);
         $settings->site_name = $validated['site_name'];
         $settings->cur_text = $validated['cur_text'];
         $settings->cur_sym = $validated['cur_sym'];
@@ -49,5 +49,21 @@ class SettingController extends Controller
         $settings->save();
 
         return back()->with('status', 'Settings updated successfully.');
+    }
+
+    private function defaultSettings(): GeneralSetting
+    {
+        return new GeneralSetting([
+            'site_name' => 'To-app',
+            'cur_text' => 'USD',
+            'cur_sym' => '$',
+            'paginate_number' => 20,
+            'registration' => 1,
+            'ev' => 0,
+            'sv' => 0,
+            'kv' => 0,
+            'maintenance_mode' => 0,
+            'secure_password' => 0,
+        ]);
     }
 }

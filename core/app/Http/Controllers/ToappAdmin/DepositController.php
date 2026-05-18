@@ -62,6 +62,17 @@ class DepositController extends Controller
         $deposit->status = Status::PAYMENT_REJECT;
         $deposit->save();
 
+        notify($deposit->user, 'DEPOSIT_REJECT', [
+            'method_name' => $deposit->methodName(),
+            'method_currency' => $deposit->method_currency,
+            'method_amount' => showAmount($deposit->final_amount, currencyFormat: false),
+            'amount' => showAmount($deposit->amount, currencyFormat: false),
+            'charge' => showAmount($deposit->charge, currencyFormat: false),
+            'rate' => showAmount($deposit->rate, currencyFormat: false),
+            'trx' => $deposit->trx,
+            'rejection_message' => $validated['message'],
+        ]);
+
         return back()->with('status', 'Deposit rejected successfully.');
     }
 }
