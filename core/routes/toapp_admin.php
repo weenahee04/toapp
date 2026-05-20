@@ -51,8 +51,10 @@ Route::middleware('toapp.admin')->group(function () {
     Route::get('/reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
     Route::get('/reports/investments', [ReportController::class, 'investments'])->name('reports.investments');
     Route::get('/reports/logins', [ReportController::class, 'logins'])->name('reports.logins');
+    Route::get('/reports/audits', [ReportController::class, 'audits'])->name('reports.audits');
 
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/export', [ReferralController::class, 'export'])->name('referrals.export');
     Route::post('/referrals/rules', [ReferralController::class, 'storeRule'])->name('referrals.rules.store');
     Route::delete('/referrals/rules/{referral}', [ReferralController::class, 'destroyRule'])->name('referrals.rules.destroy');
 

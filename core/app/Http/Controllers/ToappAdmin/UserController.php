@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\ReferralCommission;
 use App\Models\Withdrawal;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,11 @@ class UserController extends Controller
         $user->status = Status::USER_ACTIVE;
         $user->save();
 
+        AdminAudit::record('member.approved', $user, [
+            'username' => $user->username,
+            'email' => $user->email,
+        ]);
+
         return back()->with('status', 'Member approved successfully.');
     }
 
@@ -76,6 +82,12 @@ class UserController extends Controller
         $user->rejected_at = now();
         $user->rejection_reason = $validated['reason'];
         $user->save();
+
+        AdminAudit::record('member.rejected', $user, [
+            'username' => $user->username,
+            'email' => $user->email,
+            'reason' => $validated['reason'],
+        ]);
 
         return back()->with('status', 'Member rejected successfully.');
     }
@@ -98,6 +110,11 @@ class UserController extends Controller
 
         $user->save();
 
+        AdminAudit::record($user->status == Status::USER_ACTIVE ? 'member.restored' : 'member.banned', $user, [
+            'username' => $user->username,
+            'reason' => $validated['reason'] ?? null,
+        ]);
+
         return back()->with('status', $message);
     }
 
@@ -113,6 +130,8 @@ class UserController extends Controller
         $user->sv = (int) ($validated['sv'] ?? 0);
         $user->kv = (int) ($validated['kv'] ?? Status::KYC_UNVERIFIED);
         $user->save();
+
+        AdminAudit::record('member.verification_updated', $user, $validated);
 
         return back()->with('status', 'Verification flags updated.');
     }
@@ -148,6 +167,12 @@ class UserController extends Controller
             $transaction->trx = getTrx();
             $transaction->save();
         });
+
+        AdminAudit::record('member.balance_updated', $user, [
+            'action' => $validated['act'],
+            'amount' => $amount,
+            'remark' => $validated['remark'],
+        ]);
 
         return back()->with('status', 'Balance updated and ledger entry created.');
     }

@@ -424,6 +424,16 @@
             box-shadow: 0 0 0 4px rgba(18, 104, 243, .1);
         }
 
+        .app-field-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--to-muted);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
         .app-pills {
             display: flex;
             flex-wrap: wrap;
@@ -562,6 +572,128 @@
             padding: 28px;
             text-align: center;
             color: var(--to-muted);
+        }
+
+        .app-network-hero {
+            background:
+                radial-gradient(circle at 18% 15%, rgba(255, 255, 255, .24), transparent 22%),
+                radial-gradient(circle at 90% 20%, rgba(20, 199, 214, .42), transparent 30%),
+                linear-gradient(135deg, #062b55 0%, #1268f3 48%, #13c8d6 100%);
+        }
+
+        .app-network-copy {
+            width: min(100%, 720px);
+        }
+
+        .app-network-copy input {
+            color: #fff;
+            border-color: rgba(255, 255, 255, .22);
+            background: rgba(255, 255, 255, .14);
+        }
+
+        .app-network-card {
+            overflow: hidden;
+        }
+
+        .app-network-ring {
+            display: grid;
+            place-items: center;
+            min-height: 210px;
+            border-radius: 24px;
+            text-align: center;
+            background:
+                radial-gradient(circle, rgba(18, 104, 243, .14) 0 38%, transparent 39%),
+                conic-gradient(from 140deg, rgba(18, 104, 243, .18), rgba(20, 199, 214, .34), rgba(22, 163, 74, .16), rgba(18, 104, 243, .18));
+        }
+
+        .app-network-ring > div {
+            display: grid;
+            place-items: center;
+            width: 148px;
+            height: 148px;
+            padding: 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .92);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, .12);
+        }
+
+        .app-network-ring span,
+        .app-network-ring small {
+            color: var(--to-muted);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .app-network-ring strong {
+            color: var(--to-ink);
+            font-size: 42px;
+            line-height: .95;
+            font-weight: 900;
+            letter-spacing: -.05em;
+        }
+
+        .app-network-split {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .app-network-split div {
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(18, 104, 243, .07);
+        }
+
+        .app-network-split span,
+        .app-network-split strong {
+            display: block;
+        }
+
+        .app-network-split span {
+            color: var(--to-muted);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .app-network-split strong {
+            margin-top: 4px;
+            color: var(--to-ink);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .app-status-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .app-status-pill.is-active {
+            color: #0f6b44;
+            background: rgba(22, 163, 74, .12);
+        }
+
+        .app-status-pill.is-muted {
+            color: var(--to-muted);
+            background: rgba(100, 116, 139, .12);
+        }
+
+        .app-pagination nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-pagination .pagination {
+            margin: 0;
         }
 
         .withdraw-summary-box {
@@ -708,6 +840,10 @@
                 align-items: flex-start;
                 flex-direction: column;
                 gap: 8px;
+            }
+
+            .app-network-ring {
+                min-height: 184px;
             }
         }
     </style>

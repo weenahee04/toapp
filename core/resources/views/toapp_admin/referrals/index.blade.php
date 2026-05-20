@@ -1,6 +1,29 @@
 @extends('toapp_admin.layouts.app')
 
 @section('content')
+<section class="ta-grid ta-grid-stats">
+    <div class="ta-stat is-success">
+        <span>Total paid</span>
+        <strong>{{ number_format((float) $stats['total_paid'], 2) }}</strong>
+        <small>Filtered commission value</small>
+    </div>
+    <div class="ta-stat">
+        <span>Payout entries</span>
+        <strong>{{ number_format($stats['commission_count']) }}</strong>
+        <small>Ledger records</small>
+    </div>
+    <div class="ta-stat is-warning">
+        <span>Earners</span>
+        <strong>{{ number_format($stats['earner_count']) }}</strong>
+        <small>Members who received commission</small>
+    </div>
+    <div class="ta-stat">
+        <span>Source buyers</span>
+        <strong>{{ number_format($stats['source_count']) }}</strong>
+        <small>Members who triggered payouts</small>
+    </div>
+</section>
+
 <section class="ta-grid ta-grid-main">
     <article class="ta-panel">
         <div class="ta-panel-head">
@@ -95,8 +118,19 @@
 
     <form class="ta-toolbar" method="GET">
         <label class="ta-field compact"><span>Search</span><input type="search" name="search" value="{{ request('search') }}" placeholder="trx, earner, source"></label>
+        <label class="ta-field compact">
+            <span>Package</span>
+            <select name="plan_id">
+                <option value="">Any</option>
+                <option value="global" @selected(request('plan_id') === 'global')>Global / none</option>
+                @foreach($plans as $plan)
+                    <option value="{{ $plan->id }}" @selected((string) request('plan_id') === (string) $plan->id)>{{ $plan->name }}</option>
+                @endforeach
+            </select>
+        </label>
         <label class="ta-field compact"><span>Level</span><input type="number" name="level" min="1" value="{{ request('level') }}" placeholder="Any"></label>
         <button class="ta-secondary-btn" type="submit"><i class="las la-filter"></i> Filter</button>
+        <a class="ta-secondary-btn" href="{{ route('toapp.admin.referrals.export', request()->query()) }}"><i class="las la-file-csv"></i> Export CSV</a>
     </form>
 
     <div class="ta-table-wrap">

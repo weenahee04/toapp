@@ -5,6 +5,7 @@
     <a href="{{ route('toapp.admin.reports.transactions') }}">Transactions</a>
     <a href="{{ route('toapp.admin.reports.investments') }}">Investments</a>
     <a class="active" href="{{ route('toapp.admin.reports.logins') }}">Login History</a>
+    <a href="{{ route('toapp.admin.reports.audits') }}">Audit Logs</a>
 </section>
 
 <section class="ta-panel">

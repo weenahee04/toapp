@@ -6,6 +6,7 @@ use App\Constants\Status;
 use App\Models\Plan;
 use App\Models\Referral;
 use App\Models\ReferralCommission;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -25,16 +26,16 @@ class ReferralController extends Controller
             ->orderBy('level')
             ->get();
 
-        $commissions = ReferralCommission::with(['earner', 'sourceUser', 'plan'])
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->string('search')->toString();
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('trx', 'like', "%{$search}%")
-                        ->orWhereHas('earner', fn ($user) => $user->where('username', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))
-                        ->orWhereHas('sourceUser', fn ($user) => $user->where('username', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->filled('level'), fn ($query) => $query->where('level', $request->integer('level')))
+        $commissionQuery = $this->commissionQuery($request);
+
+        $stats = [
+            'total_paid' => (clone $commissionQuery)->sum('amount'),
+            'commission_count' => (clone $commissionQuery)->count(),
+            'earner_count' => (clone $commissionQuery)->distinct('earner_user_id')->count('earner_user_id'),
+            'source_count' => (clone $commissionQuery)->distinct('source_user_id')->count('source_user_id'),
+        ];
+
+        $commissions = $commissionQuery
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -44,7 +45,37 @@ class ReferralController extends Controller
             'plans' => Plan::orderBy('name')->get(),
             'rules' => $rules,
             'commissions' => $commissions,
+            'stats' => $stats,
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'referral-commissions-' . now()->format('Ymd-His') . '.csv';
+        $commissions = $this->commissionQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($commissions) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['TRX', 'Earner', 'Earner Email', 'Source Member', 'Source Email', 'Package', 'Level', 'Percent', 'Base Amount', 'Commission Amount', 'Paid At']);
+
+            foreach ($commissions as $commission) {
+                fputcsv($handle, [
+                    $commission->trx,
+                    optional($commission->earner)->username,
+                    optional($commission->earner)->email,
+                    optional($commission->sourceUser)->username,
+                    optional($commission->sourceUser)->email,
+                    optional($commission->plan)->name,
+                    $commission->level,
+                    $commission->percent,
+                    $commission->base_amount,
+                    $commission->amount,
+                    optional($commission->paid_at ?? $commission->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv']);
     }
 
     public function storeRule(Request $request)
@@ -56,7 +87,7 @@ class ReferralController extends Controller
             'status' => ['nullable', 'boolean'],
         ]);
 
-        Referral::updateOrCreate(
+        $rule = Referral::updateOrCreate(
             [
                 'commission_type' => 'package_commission',
                 'plan_id' => $validated['plan_id'] ?? null,
@@ -68,13 +99,45 @@ class ReferralController extends Controller
             ]
         );
 
+        AdminAudit::record('referral.rule_saved', $rule, [
+            'plan_id' => $rule->plan_id,
+            'level' => $rule->level,
+            'percent' => $rule->percent,
+            'status' => $rule->status,
+        ]);
+
         return back()->with('status', 'Referral rule saved successfully.');
     }
 
     public function destroyRule(Referral $referral)
     {
+        AdminAudit::record('referral.rule_deleted', $referral, [
+            'plan_id' => $referral->plan_id,
+            'level' => $referral->level,
+            'percent' => $referral->percent,
+        ]);
+
         $referral->delete();
 
         return back()->with('status', 'Referral rule deleted.');
+    }
+
+    protected function commissionQuery(Request $request)
+    {
+        return ReferralCommission::with(['earner', 'sourceUser', 'plan'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('trx', 'like', "%{$search}%")
+                        ->orWhereHas('earner', fn ($user) => $user->where('username', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))
+                        ->orWhereHas('sourceUser', fn ($user) => $user->where('username', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->filled('level'), fn ($query) => $query->where('level', $request->integer('level')))
+            ->when($request->filled('plan_id'), function ($query) use ($request) {
+                $request->plan_id === 'global'
+                    ? $query->whereNull('plan_id')
+                    : $query->where('plan_id', $request->integer('plan_id'));
+            });
     }
 }

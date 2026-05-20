@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ToappAdmin;
 
+use App\Models\AdminAuditLog;
 use App\Models\Investment;
 use App\Models\Transaction;
 use App\Models\UserLogin;
@@ -81,6 +82,28 @@ class ReportController extends Controller
         return view('toapp_admin.reports.logins', [
             'pageTitle' => 'Login Reports',
             'logins' => $logins,
+        ]);
+    }
+
+    public function audits(Request $request)
+    {
+        $audits = AdminAuditLog::with('admin')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('action', 'like', "%{$search}%")
+                        ->orWhere('target_type', 'like', "%{$search}%")
+                        ->orWhere('ip_address', 'like', "%{$search}%")
+                        ->orWhereHas('admin', fn ($admin) => $admin->where('username', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
+                });
+            })
+            ->latest()
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('toapp_admin.reports.audits', [
+            'pageTitle' => 'Admin Audit Logs',
+            'audits' => $audits,
         ]);
     }
 }

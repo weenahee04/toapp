@@ -311,11 +311,43 @@ class UserController extends Controller
     {
     
         $pageTitle = 'My Referrals';
-        $referrals = Referral::all();
+        $referrals = Referral::with('plan')
+            ->whereIn('commission_type', ['package_commission', 'deposit_commission'])
+            ->orderBy('level')
+            ->orderBy('plan_id')
+            ->get();
         $user = auth()->user();
-        $level = Referral::max('level');
+        $level = max((int) $referrals->max('level'), 1);
         $totalNetwork = $this->totalLevelCountData($user->id,$level);
-        return view('Template::user.referrals', compact('pageTitle', 'referrals','totalNetwork'));
+        $levelCounts = collect($this->levelCountData($user->id, $level))->keyBy('level');
+        $directReferrals = User::where('ref_by', $user->id)
+            ->latest()
+            ->take(8)
+            ->get();
+        $commissions = ReferralCommission::with(['sourceUser', 'plan'])
+            ->where('earner_user_id', $user->id)
+            ->latest()
+            ->paginate(10);
+        $totalReferralCommission = ReferralCommission::where('earner_user_id', $user->id)->sum('amount');
+        $monthlyReferralCommission = ReferralCommission::where('earner_user_id', $user->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+        $referralCode = $user->refno ?: $user->username;
+        $referralLink = route('home', ['reference' => $referralCode]);
+
+        return view('Template::user.referrals', compact(
+            'pageTitle',
+            'referrals',
+            'totalNetwork',
+            'levelCounts',
+            'directReferrals',
+            'commissions',
+            'totalReferralCommission',
+            'monthlyReferralCommission',
+            'referralCode',
+            'referralLink'
+        ));
     }
     protected function totalLevelCountData($user_id,$level){
       $totalLevel = DB::select("
@@ -360,8 +392,8 @@ class UserController extends Controller
             SELECT 
                 lr.level, 
                 COALESCE(SUM(CASE WHEN ul.plan_id != 0 THEN 1 ELSE 0 END), 0) AS active_count,
-                COALESCE(SUM(CASE WHEN ul.plan_id = 0 THEN 1 ELSE 0 END), 0) AS inactive_count,
-                COALESCE(SUM(CASE WHEN ul.plan_id != 0 THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN ul.plan_id = 0 THEN 1 ELSE 0 END), 0) AS total_count
+                COALESCE(SUM(CASE WHEN ul.plan_id = 0 OR ul.plan_id IS NULL THEN 1 ELSE 0 END), 0) AS inactive_count,
+                COALESCE(SUM(CASE WHEN ul.plan_id != 0 THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN ul.plan_id = 0 OR ul.plan_id IS NULL THEN 1 ELSE 0 END), 0) AS total_count
             FROM level_range lr
             LEFT JOIN user_level ul ON ul.level = lr.level
             GROUP BY lr.level;
@@ -380,9 +412,7 @@ class UserController extends Controller
 
         $user = auth()->user();
 
-        $levels = Referral::where('level',$request->level)->first();
-
-        $maxLevel = Referral::max('level');
+        $maxLevel = max((int) Referral::max('level'), 1);
 
         $level = $request->level;
         
