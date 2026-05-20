@@ -59,6 +59,26 @@
     @endif
     @stack('script')
     <script>
+        (function() {
+            function hidePreloader() {
+                document.querySelectorAll('.preload, .preloader').forEach(function(loader) {
+                    loader.style.opacity = '0';
+                    loader.style.pointerEvents = 'none';
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                    }, 250);
+                });
+                document.documentElement.classList.add('page-loaded');
+            }
+
+            window.addEventListener('load', hidePreloader);
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(hidePreloader, 400);
+            });
+            setTimeout(hidePreloader, 1500);
+        })();
+    </script>
+    <script>
         (function($) {
             "use strict";
             $(".langSel").on("change", function() {
