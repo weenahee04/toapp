@@ -148,7 +148,7 @@
                 <div class="app-card app-downline-control">
                     <form method="GET" class="app-downline-filter">
                         <label class="app-field-label" for="network-level-filter">@lang('Show level')</label>
-                        <select class="app-form-control" id="network-level-filter" name="network_level" onchange="this.form.submit()">
+                        <select class="app-form-control" id="network-level-filter" name="network_level">
                             <option value="">@lang('All levels')</option>
                             @if($levels->isNotEmpty())
                                 @foreach($levels as $level)
@@ -290,9 +290,19 @@
         const levelTotal = document.getElementById('level-total');
         const levelCounts = document.getElementById('level-user-counts');
         const shareButton = document.getElementById('share-referral-link');
+        const networkLevelFilter = document.getElementById('network-level-filter');
 
         levelSelect?.addEventListener('change', function() {
             levelStatusShow(this.value);
+        });
+
+        networkLevelFilter?.addEventListener('change', function() {
+            if (!this.value) {
+                window.location.href = "{{ route('user.referrals') }}";
+                return;
+            }
+
+            this.form.submit();
         });
 
         async function levelStatusShow(level) {

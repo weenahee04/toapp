@@ -324,6 +324,14 @@ class UserController extends Controller
         $networkRows = collect($this->networkMembersData($user->id, $level));
         $selectedNetworkLevel = request('network_level');
 
+        if (request()->has('network_level') && ($selectedNetworkLevel === null || $selectedNetworkLevel === '')) {
+            $cleanQuery = collect(request()->query())
+                ->reject(fn ($value, $key) => $key === 'network_level' || $value === null || $value === '')
+                ->all();
+
+            return redirect()->route('user.referrals', $cleanQuery);
+        }
+
         if ($selectedNetworkLevel !== null && $selectedNetworkLevel !== '') {
             $networkRows = $networkRows->where('level', (int) $selectedNetworkLevel)->values();
         }

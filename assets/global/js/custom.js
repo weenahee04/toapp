@@ -73,7 +73,9 @@ $(document).ready(function(){
  
 $(window).on("load", function() {
   
-  $(".preload").fadeOut();
+  $(".preload, .preloader").delay(150).fadeOut(250, function() {
+    $(this).css("display", "none");
+  });
 
   setTimeout(function () {
      $("html").addClass("page-loaded");
@@ -101,5 +103,11 @@ $(window).on("load", function() {
       }, 'xml');
   });
 });
- 
- 
+
+$(function() {
+  setTimeout(function() {
+    $(".preload, .preloader").fadeOut(200, function() {
+      $(this).css("display", "none");
+    });
+  }, 1200);
+});
