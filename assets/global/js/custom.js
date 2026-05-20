@@ -74,7 +74,11 @@ $(document).ready(function(){
 $(window).on("load", function() {
   
   $(".preload, .preloader").delay(150).fadeOut(250, function() {
-    $(this).css("display", "none");
+    $(this).css({
+      display: "none",
+      visibility: "hidden",
+      pointerEvents: "none"
+    });
   });
 
   setTimeout(function () {
@@ -107,7 +111,11 @@ $(window).on("load", function() {
 $(function() {
   setTimeout(function() {
     $(".preload, .preloader").fadeOut(200, function() {
-      $(this).css("display", "none");
+      $(this).css({
+        display: "none",
+        visibility: "hidden",
+        pointerEvents: "none"
+      });
     });
   }, 1200);
 });
