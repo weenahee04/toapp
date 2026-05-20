@@ -1,11 +1,16 @@
 @extends('toapp_admin.layouts.app')
 
 @section('content')
+@php($admin = auth('admin')->user())
 <section class="ta-tabs">
-    <a href="{{ route('toapp.admin.reports.transactions') }}">Transactions</a>
+    @if($admin?->canAccess('reports'))
+        <a href="{{ route('toapp.admin.reports.transactions') }}">Transactions</a>
+    @endif
     <a class="active" href="{{ route('toapp.admin.reports.investments') }}">Investments</a>
-    <a href="{{ route('toapp.admin.reports.logins') }}">Login History</a>
-    <a href="{{ route('toapp.admin.reports.audits') }}">Audit Logs</a>
+    @if($admin?->canAccess('reports'))
+        <a href="{{ route('toapp.admin.reports.logins') }}">Login History</a>
+        <a href="{{ route('toapp.admin.reports.audits') }}">Audit Logs</a>
+    @endif
 </section>
 
 <section class="ta-panel">
@@ -43,7 +48,7 @@
                         <td><span class="ta-badge {{ $statusClass }}">{{ $statusLabel }}</span><small>{{ $investment->rejection_reason }}</small></td>
                         <td><strong>{{ $investment->next_return_date ? \Carbon\Carbon::parse($investment->next_return_date)->format('M d, Y') : '-' }}</strong><small>approved {{ $investment->approved_at ? $investment->approved_at->format('M d, Y') : '-' }}</small></td>
                         <td>
-                            @if((int) $investment->status === 0)
+                            @if((int) $investment->status === 0 && $admin?->canAccess('investments'))
                                 <div class="ta-action-stack">
                                     <form method="POST" action="{{ route('toapp.admin.reports.investments.approve', $investment) }}">
                                         @csrf

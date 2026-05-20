@@ -1,6 +1,7 @@
 @extends('toapp_admin.layouts.app')
 
 @section('content')
+@php($admin = auth('admin')->user())
 <section class="ta-grid ta-grid-stats">
     <article class="ta-stat"><span>Balance</span><strong>{{ number_format((float) $user->balance, 2) }}</strong><small>Current wallet</small></article>
     <article class="ta-stat"><span>Total Deposit</span><strong>{{ number_format((float) $totalDeposit, 2) }}</strong><small>Successful only</small></article>
@@ -75,15 +76,17 @@
                 @endif
             </form>
 
-            <form method="POST" action="{{ route('toapp.admin.users.balance', $user) }}">
-                @csrf
-                <div class="ta-two-col">
-                    <label class="ta-field"><span>Action</span><select name="act"><option value="add">Add</option><option value="sub">Subtract</option></select></label>
-                    <label class="ta-field"><span>Amount</span><input name="amount" type="number" step="0.01" min="0.01" required></label>
-                </div>
-                <label class="ta-field"><span>Remark</span><input name="remark" required maxlength="255" placeholder="Why this adjustment is needed"></label>
-                <button class="ta-secondary-btn" type="submit">Update Balance</button>
-            </form>
+            @if($admin?->canAccess('balances'))
+                <form method="POST" action="{{ route('toapp.admin.users.balance', $user) }}">
+                    @csrf
+                    <div class="ta-two-col">
+                        <label class="ta-field"><span>Action</span><select name="act"><option value="add">Add</option><option value="sub">Subtract</option></select></label>
+                        <label class="ta-field"><span>Amount</span><input name="amount" type="number" step="0.01" min="0.01" required></label>
+                    </div>
+                    <label class="ta-field"><span>Remark</span><input name="remark" required maxlength="255" placeholder="Why this adjustment is needed"></label>
+                    <button class="ta-secondary-btn" type="submit">Update Balance</button>
+                </form>
+            @endif
         </div>
     </article>
 </section>

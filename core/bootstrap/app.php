@@ -12,6 +12,7 @@ use App\Http\Middleware\RegistrationStep;
 use App\Http\Middleware\RegistrationCheckStep;
 use App\Http\Middleware\ToappAdminAuthenticate;
 use App\Http\Middleware\ToappAdminGuest;
+use App\Http\Middleware\ToappAdminPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -80,6 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.guest' => RedirectIfAdmin::class,
             'toapp.admin' => ToappAdminAuthenticate::class,
             'toapp.admin.guest' => ToappAdminGuest::class,
+            'toapp.admin.can' => ToappAdminPermission::class,
 
             'check.status' => CheckStatus::class,
             'demo' => Demo::class,

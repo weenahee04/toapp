@@ -30,6 +30,16 @@ class AuthController extends Controller
                 ->withErrors(['username' => 'Username or password is incorrect.']);
         }
 
+        $admin = Auth::guard('admin')->user();
+
+        if (array_key_exists('status', $admin->getAttributes()) && (int) $admin->status !== 1) {
+            Auth::guard('admin')->logout();
+
+            return back()
+                ->withInput($request->only('username', 'remember'))
+                ->withErrors(['username' => 'This admin account is disabled.']);
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('toapp.admin.dashboard'));

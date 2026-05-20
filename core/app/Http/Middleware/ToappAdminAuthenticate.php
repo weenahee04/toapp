@@ -14,6 +14,14 @@ class ToappAdminAuthenticate
             return redirect()->route('toapp.admin.login');
         }
 
+        $admin = Auth::guard('admin')->user();
+
+        if (array_key_exists('status', $admin->getAttributes()) && (int) $admin->status !== 1) {
+            Auth::guard('admin')->logout();
+
+            return redirect()->route('toapp.admin.login')->withErrors(['username' => 'This admin account is disabled.']);
+        }
+
         return $next($request);
     }
 }

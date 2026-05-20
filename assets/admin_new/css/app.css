@@ -640,6 +640,7 @@ body {
 .ta-admin-chip {
     display: inline-flex;
     align-items: center;
+    gap: 8px;
     min-height: 40px;
     padding: 0 14px;
     border: 1px solid var(--ta-line);
@@ -647,6 +648,18 @@ body {
     color: var(--ta-muted);
     background: #fff;
     font-weight: 700;
+}
+
+.ta-admin-chip strong,
+.ta-admin-chip small {
+    display: block;
+}
+
+.ta-admin-chip small {
+    color: var(--ta-primary);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
 }
 
 .ta-icon-btn {
@@ -918,13 +931,45 @@ body {
 }
 
 .ta-toggle-row label,
-.ta-switch-grid label {
+.ta-switch-grid label,
+.ta-permission-grid label {
     display: flex;
     align-items: center;
     gap: 8px;
     color: var(--ta-muted);
     font-size: 13px;
     font-weight: 700;
+}
+
+.ta-check-card {
+    min-height: 48px;
+    align-self: end;
+    padding: 0 14px;
+    border: 1px solid var(--ta-line);
+    border-radius: 8px;
+    background: #fbfcfa;
+}
+
+.ta-permission-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--ta-line);
+    border-radius: 8px;
+    background: #f8faf7;
+}
+
+.ta-permission-grid label {
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.ta-permission-grid span {
+    line-height: 1.35;
 }
 
 .ta-detail-list {
@@ -1173,7 +1218,8 @@ body {
 
     .ta-toolbar,
     .ta-toolbar-slim,
-    .ta-switch-grid {
+    .ta-switch-grid,
+    .ta-permission-grid {
         grid-template-columns: 1fr 1fr;
     }
 }
@@ -1211,6 +1257,7 @@ body {
     .ta-two-col,
     .ta-toggle-row,
     .ta-switch-grid,
+    .ta-permission-grid,
     .ta-detail-list {
         grid-template-columns: 1fr;
     }

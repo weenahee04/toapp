@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('assets/admin_new/css/app.css') }}">
 </head>
 <body class="ta-admin-body">
+    @php($currentAdmin = auth('admin')->user())
     <div class="ta-shell">
         @include('toapp_admin.partials.sidebar')
         <main class="ta-main">
@@ -19,7 +20,10 @@
                     <h1>{{ $pageTitle ?? 'Dashboard' }}</h1>
                 </div>
                 <div class="ta-topbar-actions">
-                    <span class="ta-admin-chip">{{ auth('admin')->user()->username ?? 'admin' }}</span>
+                    <span class="ta-admin-chip">
+                        <strong>{{ $currentAdmin->username ?? 'admin' }}</strong>
+                        <small>{{ $currentAdmin?->roleLabel() ?? 'Admin' }}</small>
+                    </span>
                     <form action="{{ route('toapp.admin.logout') }}" method="POST">
                         @csrf
                         <button class="ta-icon-btn" type="submit" title="Logout">
