@@ -1,7 +1,9 @@
 @extends('toapp_admin.layouts.app')
 
 @section('content')
-@php($admin = auth('admin')->user())
+@php
+    $admin = auth('admin')->user();
+@endphp
 <section class="ta-grid ta-grid-stats">
     <article class="ta-stat"><span>Balance</span><strong>{{ number_format((float) $user->balance, 2) }}</strong><small>Current wallet</small></article>
     <article class="ta-stat"><span>Total Deposit</span><strong>{{ number_format((float) $totalDeposit, 2) }}</strong><small>Successful only</small></article>

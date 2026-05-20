@@ -68,7 +68,9 @@
                             <td>{{ $user->email }}</td>
                             <td>
                                 <span class="ta-badge {{ $user->status ? 'success' : 'danger' }}">{{ $user->status ? 'Active' : 'Banned' }}</span>
-                                @php($approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning'))
+                                @php
+                                    $approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning');
+                                @endphp
                                 <span class="ta-badge {{ $approvalClass }}">{{ ucfirst($user->approval_status ?? 'approved') }}</span>
                             </td>
                             <td>{{ optional($user->created_at)->format('M d, Y') }}</td>

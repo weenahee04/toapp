@@ -12,7 +12,9 @@
         </div>
         <div class="ta-method-list">
             @forelse($depositGateways as $gateway)
-                @php($currency = $gateway->singleCurrency)
+                @php
+                    $currency = $gateway->singleCurrency;
+                @endphp
                 <details class="ta-method-card">
                     <summary>
                         <span><strong>{{ $gateway->name }}</strong><small>{{ $gateway->alias }} - code {{ $gateway->code }}</small></span>

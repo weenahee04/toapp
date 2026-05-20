@@ -10,7 +10,9 @@
     <link rel="stylesheet" href="{{ asset('assets/admin_new/css/app.css') }}">
 </head>
 <body class="ta-admin-body">
-    @php($currentAdmin = auth('admin')->user())
+    @php
+        $currentAdmin = auth('admin')->user();
+    @endphp
     <div class="ta-shell">
         @include('toapp_admin.partials.sidebar')
         <main class="ta-main">

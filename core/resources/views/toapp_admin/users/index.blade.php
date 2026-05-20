@@ -63,7 +63,9 @@
                         <td>{{ number_format((float) $user->balance, 2) }}</td>
                         <td>
                             <span class="ta-badge {{ $user->status ? 'success' : 'danger' }}">{{ $user->status ? 'Active' : 'Banned' }}</span>
-                            @php($approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning'))
+                            @php
+                                $approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning');
+                            @endphp
                             <span class="ta-badge {{ $approvalClass }}">{{ ucfirst($user->approval_status ?? 'approved') }}</span>
                             <span class="ta-badge {{ $user->kv == 1 ? 'success' : 'muted' }}">KYC {{ $user->kv == 1 ? 'OK' : ($user->kv == 2 ? 'Pending' : 'No') }}</span>
                         </td>

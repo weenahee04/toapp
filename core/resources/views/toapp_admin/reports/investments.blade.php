@@ -1,7 +1,9 @@
 @extends('toapp_admin.layouts.app')
 
 @section('content')
-@php($admin = auth('admin')->user())
+@php
+    $admin = auth('admin')->user();
+@endphp
 <section class="ta-tabs">
     @if($admin?->canAccess('reports'))
         <a href="{{ route('toapp.admin.reports.transactions') }}">Transactions</a>

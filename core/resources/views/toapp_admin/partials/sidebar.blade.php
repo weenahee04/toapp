@@ -1,5 +1,7 @@
 <aside class="ta-sidebar">
-    @php($admin = auth('admin')->user())
+    @php
+        $admin = auth('admin')->user();
+    @endphp
     <a href="{{ route('toapp.admin.dashboard') }}" class="ta-brand">
         <span class="ta-brand-mark">T</span>
         <span>

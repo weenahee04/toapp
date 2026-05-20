@@ -1,7 +1,9 @@
 @extends($activeTemplate . 'layouts.master')
 
 @section('content')
-    @php($dashboardTransactions = $latestTrx->take(4))
+    @php
+        $dashboardTransactions = $latestTrx->take(4);
+    @endphp
     <div class="app-page app-dashboard">
         <div class="app-container">
             <div class="app-topbar">
