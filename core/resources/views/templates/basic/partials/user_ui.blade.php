@@ -735,6 +735,59 @@
             background: rgba(100, 116, 139, .12);
         }
 
+        .app-status-pill.is-pending {
+            color: #9a5a00;
+            background: rgba(249, 115, 22, .14);
+        }
+
+        .app-status-pill.is-level {
+            color: #075985;
+            background: rgba(20, 199, 214, .14);
+        }
+
+        .app-downline-control {
+            display: grid;
+            grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+            gap: 14px;
+            align-items: end;
+        }
+
+        .app-downline-filter {
+            display: grid;
+            gap: 8px;
+        }
+
+        .app-downline-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .app-downline-summary div {
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(18, 104, 243, .07);
+        }
+
+        .app-downline-summary span,
+        .app-downline-summary strong {
+            display: block;
+        }
+
+        .app-downline-summary span {
+            color: var(--to-muted);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .app-downline-summary strong {
+            margin-top: 4px;
+            color: var(--to-ink);
+            font-size: 20px;
+            font-weight: 900;
+        }
+
         .app-pagination nav {
             display: flex;
             flex-wrap: wrap;
@@ -895,6 +948,11 @@
 
             .app-network-ring {
                 min-height: 184px;
+            }
+
+            .app-downline-control,
+            .app-downline-summary {
+                grid-template-columns: 1fr;
             }
         }
     </style>

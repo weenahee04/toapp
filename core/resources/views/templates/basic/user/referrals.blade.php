@@ -134,6 +134,86 @@
             <div class="col-lg-7">
                 <div class="app-section-title">
                     <div>
+                        <h2>@lang('My downline')</h2>
+                        <p>@lang('Inspect every member in your referral line by level, upline, plan status, and earned commission.')</p>
+                    </div>
+                </div>
+
+                <div class="app-card app-downline-control">
+                    <form method="GET" class="app-downline-filter">
+                        <label class="app-field-label" for="network-level-filter">@lang('Show level')</label>
+                        <select class="app-form-control" id="network-level-filter" name="network_level" onchange="this.form.submit()">
+                            <option value="">@lang('All levels')</option>
+                            @forelse($levels as $level)
+                                <option value="{{ $level }}" @selected((string) $selectedNetworkLevel === (string) $level)>@lang('Level') {{ $level }}</option>
+                            @empty
+                                <option value="1">@lang('Level') 1</option>
+                            @endforelse
+                        </select>
+                    </form>
+                    <div class="app-downline-summary">
+                        <div><span>@lang('Active')</span><strong>{{ $networkSummary['active'] }}</strong></div>
+                        <div><span>@lang('No plan')</span><strong>{{ $networkSummary['inactive'] }}</strong></div>
+                        <div><span>@lang('Pending')</span><strong>{{ $networkSummary['pending'] }}</strong></div>
+                        <div><span>@lang('Earned')</span><strong>{{ showAmount($networkSummary['commission'], 0) }}</strong></div>
+                    </div>
+                </div>
+
+                <div class="app-table-shell mt-3">
+                    <div class="table-responsive">
+                        <table class="table custom--table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>@lang('Member')</th>
+                                    <th>@lang('Level')</th>
+                                    <th>@lang('Upline')</th>
+                                    <th>@lang('Plan')</th>
+                                    <th>@lang('Status')</th>
+                                    <th>@lang('Commission')</th>
+                                    <th>@lang('Joined')</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($networkMembers as $member)
+                                    @php
+                                        $fullName = trim(($member->firstname ?? '') . ' ' . ($member->lastname ?? ''));
+                                        $approval = $member->approval_status ?: 'approved';
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $member->username }}</strong>
+                                            <span class="d-block text-muted">{{ $fullName ?: $member->email }}</span>
+                                        </td>
+                                        <td><span class="app-status-pill is-level">@lang('Level') {{ $member->level }}</span></td>
+                                        <td>{{ $member->referrer_username ?: '-' }}</td>
+                                        <td>{{ $member->plan_name ?: __('No plan') }}</td>
+                                        <td>
+                                            <span class="app-status-pill {{ (int) $member->status === 1 && $approval === 'approved' ? 'is-active' : ($approval === 'pending' ? 'is-pending' : 'is-muted') }}">
+                                                {{ $approval === 'approved' ? ((int) $member->status === 1 ? __('Active') : __('Disabled')) : __(ucfirst($approval)) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ showAmount($member->total_commission, 0) }}</strong>
+                                            <span class="d-block text-muted">{{ (int) $member->commission_count }} @lang('records')</span>
+                                        </td>
+                                        <td>{{ showDateTime($member->created_at, 'M d, Y') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="app-empty-state">@lang('No members found in this referral line yet.')</div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="app-pagination mt-3">{{ $networkMembers->links() }}</div>
+
+                <div class="app-section-title">
+                    <div>
                         <h2>@lang('Direct members')</h2>
                         <p>@lang('Newest members who joined with your referral code.')</p>
                     </div>

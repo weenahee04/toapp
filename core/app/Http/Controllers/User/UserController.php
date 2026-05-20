@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Withdrawal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -320,6 +321,33 @@ class UserController extends Controller
         $level = max((int) $referrals->max('level'), 1);
         $totalNetwork = $this->totalLevelCountData($user->id,$level);
         $levelCounts = collect($this->levelCountData($user->id, $level))->keyBy('level');
+        $networkRows = collect($this->networkMembersData($user->id, $level));
+        $selectedNetworkLevel = request('network_level');
+
+        if ($selectedNetworkLevel !== null && $selectedNetworkLevel !== '') {
+            $networkRows = $networkRows->where('level', (int) $selectedNetworkLevel)->values();
+        }
+
+        $networkSummary = [
+            'active' => $networkRows->filter(fn ($member) => (int) $member->plan_id !== 0)->count(),
+            'inactive' => $networkRows->filter(fn ($member) => (int) $member->plan_id === 0)->count(),
+            'pending' => $networkRows->where('approval_status', 'pending')->count(),
+            'commission' => $networkRows->sum(fn ($member) => (float) $member->total_commission),
+        ];
+
+        $networkPage = LengthAwarePaginator::resolveCurrentPage('network_page');
+        $networkMembers = new LengthAwarePaginator(
+            $networkRows->forPage($networkPage, 12)->values(),
+            $networkRows->count(),
+            12,
+            $networkPage,
+            [
+                'path' => route('user.referrals'),
+                'pageName' => 'network_page',
+                'query' => request()->except('network_page'),
+            ]
+        );
+
         $directReferrals = User::where('ref_by', $user->id)
             ->latest()
             ->take(8)
@@ -341,6 +369,9 @@ class UserController extends Controller
             'referrals',
             'totalNetwork',
             'levelCounts',
+            'networkMembers',
+            'networkSummary',
+            'selectedNetworkLevel',
             'directReferrals',
             'commissions',
             'totalReferralCommission',
@@ -349,6 +380,63 @@ class UserController extends Controller
             'referralLink'
         ));
     }
+
+    protected function networkMembersData($user_id, $level)
+    {
+        return DB::select("
+            WITH RECURSIVE user_level AS (
+                SELECT
+                    id,
+                    ref_by,
+                    plan_id,
+                    username,
+                    firstname,
+                    lastname,
+                    email,
+                    status,
+                    approval_status,
+                    created_at,
+                    1 AS level
+                FROM users
+                WHERE ref_by = ?
+
+                UNION ALL
+
+                SELECT
+                    u.id,
+                    u.ref_by,
+                    u.plan_id,
+                    u.username,
+                    u.firstname,
+                    u.lastname,
+                    u.email,
+                    u.status,
+                    u.approval_status,
+                    u.created_at,
+                    ul.level + 1
+                FROM users u
+                JOIN user_level ul ON u.ref_by = ul.id
+                WHERE ul.level < ?
+            )
+            SELECT
+                ul.*,
+                ref.username AS referrer_username,
+                plans.name AS plan_name,
+                COALESCE(commissions.total_commission, 0) AS total_commission,
+                COALESCE(commissions.commission_count, 0) AS commission_count
+            FROM user_level ul
+            LEFT JOIN users ref ON ref.id = ul.ref_by
+            LEFT JOIN plans ON plans.id = ul.plan_id
+            LEFT JOIN (
+                SELECT source_user_id, SUM(amount) AS total_commission, COUNT(*) AS commission_count
+                FROM referral_commissions
+                WHERE earner_user_id = ?
+                GROUP BY source_user_id
+            ) commissions ON commissions.source_user_id = ul.id
+            ORDER BY ul.level ASC, ul.created_at DESC
+        ", [$user_id, $level, $user_id]);
+    }
+
     protected function totalLevelCountData($user_id,$level){
       $totalLevel = DB::select("
         WITH RECURSIVE user_level AS (
