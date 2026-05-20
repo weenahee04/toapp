@@ -44,8 +44,10 @@
                             <label class="fw-bold mb-2">@lang('Status')</label>
                             <select name="status" class="form-control select2-basic" data-minimum-results-for-search="-1">
                                 <option value="">@lang('All')</option>
+                                <option value="0" @selected(request()->status === '0')>@lang('Pending')</option>
                                 <option value="2" @selected(request()->status == 2)>@lang('Running')</option>
                                 <option value="1" @selected(request()->status == 1)>@lang('Completed')</option>
+                                <option value="3" @selected(request()->status == 3)>@lang('Rejected')</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
@@ -93,7 +95,15 @@
                                 <td>{{ $investment->total_return }} @lang('Times')</td>
                                 <td>{{ $investment->total_paid }} @lang('Times')</td>
                                 <td>@php echo $investment->statusBadge @endphp</td>
-                                <td>{{ showDateTime($investment->next_return_date) }}</td>
+                                <td>
+                                    @if($investment->status == 0)
+                                        @lang('Waiting admin approval')
+                                    @elseif($investment->status == 3)
+                                        {{ $investment->rejection_reason ?: __('Rejected') }}
+                                    @else
+                                        {{ showDateTime($investment->next_return_date) }}
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>

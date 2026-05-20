@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ToappAdmin;
 use App\Constants\Status;
 use App\Models\Transaction;
 use App\Models\Withdrawal;
+use App\Support\AdminAudit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -13,16 +14,7 @@ class WithdrawalController extends Controller
 {
     public function index(Request $request)
     {
-        $withdrawals = Withdrawal::with(['user', 'method'])
-            ->where('status', '!=', Status::PAYMENT_INITIATE)
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->string('search')->toString();
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('trx', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')))
+        $withdrawals = $this->withdrawalQuery($request)
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -31,6 +23,48 @@ class WithdrawalController extends Controller
             'pageTitle' => 'Withdrawals',
             'withdrawals' => $withdrawals,
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $withdrawals = $this->withdrawalQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($withdrawals) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['TRX', 'User', 'Email', 'Amount', 'Charge', 'Final Amount', 'Currency', 'Method', 'Status', 'Admin Feedback', 'Date']);
+
+            foreach ($withdrawals as $withdrawal) {
+                fputcsv($handle, [
+                    $withdrawal->trx,
+                    optional($withdrawal->user)->username,
+                    optional($withdrawal->user)->email,
+                    $withdrawal->amount,
+                    $withdrawal->charge,
+                    $withdrawal->final_amount,
+                    $withdrawal->currency,
+                    optional($withdrawal->method)->name,
+                    [1 => 'Approved', 2 => 'Pending', 3 => 'Rejected'][$withdrawal->status] ?? $withdrawal->status,
+                    $withdrawal->admin_feedback,
+                    optional($withdrawal->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, 'withdrawals-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    protected function withdrawalQuery(Request $request)
+    {
+        return Withdrawal::with(['user', 'method'])
+            ->where('status', '!=', Status::PAYMENT_INITIATE)
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('trx', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')));
     }
 
     public function show(Withdrawal $withdrawal)
@@ -54,6 +88,13 @@ class WithdrawalController extends Controller
         $withdrawal->status = Status::PAYMENT_SUCCESS;
         $withdrawal->admin_feedback = $validated['details'] ?? null;
         $withdrawal->save();
+
+        AdminAudit::record('withdrawal.approved', $withdrawal, [
+            'trx' => $withdrawal->trx,
+            'amount' => $withdrawal->amount,
+            'user_id' => $withdrawal->user_id,
+            'details' => $validated['details'] ?? null,
+        ]);
 
         notify($withdrawal->user, 'WITHDRAW_APPROVE', [
             'method_name' => $withdrawal->method?->name ?? 'Withdrawal method',
@@ -99,6 +140,13 @@ class WithdrawalController extends Controller
         });
 
         $withdrawal->loadMissing(['user', 'method']);
+
+        AdminAudit::record('withdrawal.rejected', $withdrawal, [
+            'trx' => $withdrawal->trx,
+            'amount' => $withdrawal->amount,
+            'user_id' => $withdrawal->user_id,
+            'reason' => $validated['details'],
+        ]);
 
         notify($withdrawal->user, 'WITHDRAW_REJECT', [
             'method_name' => $withdrawal->method?->name ?? 'Withdrawal method',

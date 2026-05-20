@@ -1,89 +1,74 @@
-@extends($activeTemplate.'layouts.master')
+@extends($activeTemplate . 'layouts.master')
 
 @section('content')
-<div class="page">
-    <div class="page-boxed">
-        <header class="header">
-            <a href="{{ route('user.setting') }}" class="icons arrow-back"></a>
+<div class="app-page">
+    <div class="app-container">
+        <div class="app-topbar">
+            <a class="app-icon-btn" href="{{ route('user.setting') }}" aria-label="@lang('Back to settings')">
+                <i class="las la-arrow-left"></i>
+            </a>
+            <a class="app-brand" href="{{ route('user.home') }}">
+                <img src="{{ siteLogo() }}" alt="To-app">
+                <span>@lang('Security')</span>
+            </a>
+            <a class="app-icon-btn" href="{{ route('user.twofactor') }}" aria-label="@lang('Two factor')">
+                <i class="las la-shield-alt"></i>
+            </a>
+        </div>
 
-            <div class="d-flex gap-2">
-                <img class="icons svg-js mb-auto" src="{{ asset('assets/global/img/icons/icon-setting-2.svg')}}" alt="">
-                <div>
-                    <p class="fs-18">Settings</p>
-                    <p class="fs-14">Change Password</p>
-                </div>
+        <section class="app-hero">
+            <span class="app-eyebrow"><i class="las la-lock"></i> @lang('Password')</span>
+            <h1>@lang('Change your password safely.')</h1>
+            <p>@lang('Use a password you do not use elsewhere. Strong passwords protect deposits, withdrawals, and referral rewards.')</p>
+        </section>
+
+        <div class="app-section-title">
+            <div>
+                <h2>@lang('Update password')</h2>
+                <p>@lang('Confirm your current password before setting a new one.')</p>
             </div>
-        </header>
+        </div>
 
-        <div class="section py-4">
-            <div class="user-group">
-                <img class="icons avatar" src="{{ asset('assets/global/img/thumb/avatar--1.png')}}" alt="">
-                <h5>{{ auth()->user()->firstname }} {{ auth()->user()->lastname }}</h5>
-            </div>
+        <div class="app-card">
+            <form action="{{ route('user.change.password.update') }}" method="post" class="app-form-grid">
+                @csrf
+                <label class="app-field app-password-field">
+                    <span>@lang('Current Password')</span>
+                    <input type="password" id="password-current" name="current_password" required autocomplete="current-password" class="form-control">
+                    <button type="button" data-toggle-password="#password-current" aria-label="@lang('Show password')"><i class="las la-eye"></i></button>
+                </label>
 
-            <div class="boxed px-2 mt-sm-4 mt-3">
-                <form action="{{ route('user.change.password') }}" method="post">
-                    @csrf
-                    <div class="d-block px-3">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="form-group input__password">
-                                    <label class="title">@lang('Current Password')<span class="star">*</span></label>
-                                    <input type="password" id="password-toggle3" name="current_password" required autocomplete="current-password" class="form-control">
-                                    <span class="input__password-label">
-                                        <i class="fa fa-eye toggle-password3"></i>
-                                    </span>
-                                </div>
-                            </div>
+                <label class="app-field app-password-field">
+                    <span>@lang('New Password')</span>
+                    <input type="password" id="password-new" name="password" required autocomplete="new-password" class="form-control @if (gs('secure_password')) secure-password @endif">
+                    <button type="button" data-toggle-password="#password-new" aria-label="@lang('Show password')"><i class="las la-eye"></i></button>
+                </label>
 
-                            <div class="col-12">
-                                <div class="form-group input__password">
-                                    <label class="title">@lang('New Password')<span class="star">*</span></label>
-                                    <input type="password" id="password-toggle" name="password" required autocomplete="new-password" class="form-control @if (gs('secure_password')) secure-password @endif">
-                                    <span class="input__password-label">
-                                        <i class="fa fa-eye toggle-password"></i>
-                                    </span>
-                                </div>
-                            </div>
+                <label class="app-field app-password-field">
+                    <span>@lang('Confirm New Password')</span>
+                    <input type="password" id="password-confirm" name="password_confirmation" required autocomplete="new-password" class="form-control">
+                    <button type="button" data-toggle-password="#password-confirm" aria-label="@lang('Show password')"><i class="las la-eye"></i></button>
+                </label>
 
-                            <div class="col-12">
-                                <div class="form-group input__password">
-                                    <label class="title">Confirm New Password<span class="star">*</span></label>
-                                    <input type="password" id="password-toggleconfirm" name="password_confirmation" required autocomplete="new-password" class="form-control">
-                                    <span class="input__password-label">
-                                        <i class="fa fa-eye toggle-passwordconfirm"></i>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="d-block px-3 mt-2">
-                                    <button class="btn btn-gradient w-100"><span>Save</span></button>
-                                </div>
-                            </div>
+                <div class="app-list-card">
+                    <div class="app-list-item">
+                        <span class="app-list-icon"><i class="las la-info-circle"></i></span>
+                        <div class="app-list-body">
+                            <strong>@lang('Security tip')</strong>
+                            <span>@lang('A longer password is safer. Avoid names, birthdays, and repeated passwords.')</span>
                         </div>
                     </div>
-                </form>
-                <div class="p-4"></div>
-            </div>
+                </div>
+
+                <button class="app-btn app-btn-primary w-100" type="submit">
+                    <i class="las la-save"></i>
+                    @lang('Save password')
+                </button>
+            </form>
         </div>
     </div>
 </div>
 @endsection
-
-@push('style')
-<style>
-    .input__password {
-        position: relative;
-    }
-
-    .input__password-label {
-        position: absolute;
-        top: 60%;
-        right: 25px;
-    }
-</style>
-@endpush
 
 @if(gs('secure_password'))
     @push('script-lib')
@@ -93,22 +78,21 @@
 
 @push('script')
 <script>
-    $(".toggle-password").click(function() {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $("#password-toggle");
-        input.attr("type", input.attr("type") === "password" ? "text" : "password");
-    });
+    (function() {
+        "use strict";
 
-    $(".toggle-passwordconfirm").click(function() {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $("#password-toggleconfirm");
-        input.attr("type", input.attr("type") === "password" ? "text" : "password");
-    });
+        document.querySelectorAll('[data-toggle-password]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const input = document.querySelector(this.dataset.togglePassword);
+                const icon = this.querySelector('i');
+                if (!input) return;
 
-    $(".toggle-password3").click(function() {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $("#password-toggle3");
-        input.attr("type", input.attr("type") === "password" ? "text" : "password");
-    });
+                const shouldShow = input.type === 'password';
+                input.type = shouldShow ? 'text' : 'password';
+                icon.classList.toggle('la-eye', !shouldShow);
+                icon.classList.toggle('la-eye-slash', shouldShow);
+            });
+        });
+    })();
 </script>
 @endpush

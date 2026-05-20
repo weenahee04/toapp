@@ -460,6 +460,29 @@ body {
     cursor: pointer;
 }
 
+.ta-action-stack {
+    display: grid;
+    gap: 8px;
+    min-width: 170px;
+}
+
+.ta-mini-details summary {
+    cursor: pointer;
+    color: var(--ta-danger);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.ta-mini-details form {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.ta-mini-details textarea {
+    min-height: 78px;
+}
+
 .ta-primary-btn:hover {
     background: var(--ta-primary-dark);
     box-shadow: 0 14px 28px rgba(15, 111, 99, 0.22);

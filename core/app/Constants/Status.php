@@ -40,8 +40,10 @@ class Status{
     const CUR_TEXT = 2;
     const CUR_SYM = 3;
 
+    const INVESTMENT_PENDING = 0;
     const RUNNING = 2;
     const COMPLETED = 1;
+    const INVESTMENT_REJECTED = 3;
 
     const PERCENT = 1;
     const FIXED = 2;

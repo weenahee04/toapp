@@ -12,6 +12,7 @@
     <form class="ta-toolbar" method="GET">
         <label class="ta-field compact"><span>Search</span><input type="search" name="search" value="{{ request('search') }}" placeholder="username, IP, city, country"></label>
         <button class="ta-secondary-btn" type="submit"><i class="las la-filter"></i> Filter</button>
+        <a class="ta-secondary-btn" href="{{ route('toapp.admin.reports.logins.export', request()->query()) }}"><i class="las la-file-csv"></i> Export CSV</a>
     </form>
     <div class="ta-table-wrap">
         <table class="ta-table">

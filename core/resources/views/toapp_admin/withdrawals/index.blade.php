@@ -6,6 +6,7 @@
         <label class="ta-field compact"><span>Search</span><input type="search" name="search" value="{{ request('search') }}" placeholder="trx or username"></label>
         <label class="ta-field compact"><span>Status</span><select name="status"><option value="">Any</option><option value="1" @selected(request('status') === '1')>Approved</option><option value="2" @selected(request('status') === '2')>Pending</option><option value="3" @selected(request('status') === '3')>Rejected</option></select></label>
         <button class="ta-secondary-btn" type="submit"><i class="las la-search"></i> Filter</button>
+        <a class="ta-secondary-btn" href="{{ route('toapp.admin.withdrawals.export', request()->query()) }}"><i class="las la-file-csv"></i> Export CSV</a>
     </form>
     <div class="ta-table-wrap">
         <table class="ta-table">

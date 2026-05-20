@@ -1,64 +1,71 @@
-@extends($activeTemplate.'layouts.master')
+@extends($activeTemplate . 'layouts.master')
 
 @section('content')
-<div class="page">
-    <div class="page-boxed">
-        <header class="header">
-            <a href="{{ route('user.setting') }}" class="icons arrow-back"></a>
+<div class="app-page">
+    <div class="app-container">
+        <div class="app-topbar">
+            <a class="app-icon-btn" href="{{ route('user.setting') }}" aria-label="@lang('Back to settings')">
+                <i class="las la-arrow-left"></i>
+            </a>
+            <a class="app-brand" href="{{ route('user.home') }}">
+                <img src="{{ siteLogo() }}" alt="To-app">
+                <span>@lang('Withdraw Methods')</span>
+            </a>
+            <a class="app-icon-btn" href="{{ route('user.withdraw.history') }}" aria-label="@lang('Withdrawal history')">
+                <i class="las la-history"></i>
+            </a>
+        </div>
 
-            <div class="d-flex gap-2">
-                <img class="icons svg-js mb-auto" src="{{ asset('assets/global/img/icons/icon-setting-2.svg')}}" alt="">
-                <div>
-                    <p class="fs-18">Settings</p>
-                    <p class="fs-14">Withdraw Methods</p>
-                </div>
+        <section class="app-hero">
+            <span class="app-eyebrow"><i class="las la-university"></i> @lang('Payout setup')</span>
+            <h1>@lang('Choose a method when you request a withdrawal.')</h1>
+            <p>@lang('Destination details are collected per request so admin can verify every payout manually and safely.')</p>
+            <div class="app-hero-actions">
+                <a class="app-btn app-btn-primary" href="{{ route('user.withdraw.index') }}">
+                    <i class="las la-money-bill-wave"></i>
+                    @lang('Start withdrawal')
+                </a>
+                <a class="app-btn app-btn-secondary" href="{{ route('user.withdraw.history') }}">
+                    <i class="las la-receipt"></i>
+                    @lang('History')
+                </a>
             </div>
-        </header>
+        </section>
 
-        <div class="section py-4">
-            <div class="user-group">
-                <img class="icons avatar" src="{{ asset('assets/global/img/thumb/avatar--1.png')}}" alt="">
-                <h5>{{ $user->firstname }} {{ $user->lastname }}</h5>
+        <div class="app-section-title">
+            <div>
+                <h2>@lang('Available methods')</h2>
+                <p>@lang('Limits and charges are shown before you submit a payout.')</p>
             </div>
+        </div>
 
-            <div class="boxed px-2 mt-sm-4 mt-3">
-                <div class="px-3 pt-3">
-                    <p class="mb-2">Withdraw destination details are collected when you submit a withdrawal request.</p>
-                    <p class="text-muted mb-0">Available methods and limits are listed below.</p>
-                </div>
-
-                <div class="d-block px-3 py-3">
-                    <div class="row g-3">
-                        @forelse ($withdrawMethods as $method)
-                            <div class="col-12">
-                                <div class="card card-column h-100">
-                                    <div class="infos-row">
-                                        <p><small>{{ $method->name }}</small></p>
-                                        <img class="icons ms-auto" src="{{ asset('assets/global/img/icons/icon-wallet.svg') }}" alt="">
-                                    </div>
-
-                                    <h4 class="fs-12-10 mb-2">{{ $method->currency }}</h4>
-                                    <p class="mb-1">Limit: {{ showAmount($method->min_limit) }} - {{ showAmount($method->max_limit) }}</p>
-                                    <p class="mb-0 text-muted">Charge: {{ showAmount($method->fixed_charge) }} + {{ showAmount($method->percent_charge, 2, false, false, false) }}%</p>
-                                </div>
+        <div class="row app-grid">
+            @forelse ($withdrawMethods as $method)
+                <div class="col-md-6">
+                    <div class="app-card app-method-card">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="app-list-icon"><i class="las la-wallet"></i></span>
+                            <div class="app-list-body">
+                                <strong>{{ $method->name }}</strong>
+                                <span>{{ $method->currency }}</span>
                             </div>
-                        @empty
-                            <div class="col-12">
-                                <div class="card card-column">
-                                    <p class="mb-0 text-muted">No withdrawal methods are active right now.</p>
-                                </div>
-                            </div>
-                        @endforelse
+                        </div>
 
-                        <div class="col-12">
-                            <div class="d-grid gap-2">
-                                <a href="{{ route('user.withdraw.index') }}" class="btn btn-gradient w-100"><span>Start withdrawal</span></a>
-                                <a href="{{ route('user.withdraw.history') }}" class="btn btn-outline-primary w-100"><span>Withdrawal history</span></a>
-                            </div>
+                        <div class="withdraw-summary-box mt-3">
+                            <div><span>@lang('Limit')</span><strong>{{ showAmount($method->min_limit) }} - {{ showAmount($method->max_limit) }}</strong></div>
+                            <div><span>@lang('Charge')</span><strong>{{ showAmount($method->fixed_charge) }} + {{ showAmount($method->percent_charge, 2, false, false, false) }}%</strong></div>
+                            <div><span>@lang('Processing')</span><strong>@lang('Manual review')</strong></div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @empty
+                <div class="col-12">
+                    <div class="app-empty-state">
+                        <i class="las la-university d-block fs-1 mb-2"></i>
+                        @lang('No withdrawal methods are active right now.')
+                    </div>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

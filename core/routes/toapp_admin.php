@@ -26,6 +26,7 @@ Route::middleware('toapp.admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::post('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::post('/users/{user}/reject', [UserController::class, 'reject'])->name('users.reject');
@@ -39,18 +40,25 @@ Route::middleware('toapp.admin')->group(function () {
     Route::post('/plans/{plan}/status', [PlanController::class, 'status'])->name('plans.status');
 
     Route::get('/deposits', [DepositController::class, 'index'])->name('deposits.index');
+    Route::get('/deposits/export', [DepositController::class, 'export'])->name('deposits.export');
     Route::get('/deposits/{deposit}', [DepositController::class, 'show'])->name('deposits.show');
     Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('deposits.approve');
     Route::post('/deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('deposits.reject');
 
     Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+    Route::get('/withdrawals/export', [WithdrawalController::class, 'export'])->name('withdrawals.export');
     Route::get('/withdrawals/{withdrawal}', [WithdrawalController::class, 'show'])->name('withdrawals.show');
     Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
     Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('withdrawals.reject');
 
     Route::get('/reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
+    Route::get('/reports/transactions/export', [ReportController::class, 'transactionsExport'])->name('reports.transactions.export');
     Route::get('/reports/investments', [ReportController::class, 'investments'])->name('reports.investments');
+    Route::get('/reports/investments/export', [ReportController::class, 'investmentsExport'])->name('reports.investments.export');
+    Route::post('/reports/investments/{investment}/approve', [ReportController::class, 'approveInvestment'])->name('reports.investments.approve');
+    Route::post('/reports/investments/{investment}/reject', [ReportController::class, 'rejectInvestment'])->name('reports.investments.reject');
     Route::get('/reports/logins', [ReportController::class, 'logins'])->name('reports.logins');
+    Route::get('/reports/logins/export', [ReportController::class, 'loginsExport'])->name('reports.logins.export');
     Route::get('/reports/audits', [ReportController::class, 'audits'])->name('reports.audits');
 
     Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');

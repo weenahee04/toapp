@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\ToappAdmin;
 
+use App\Constants\Status;
 use App\Models\AdminAuditLog;
 use App\Models\Investment;
 use App\Models\Transaction;
 use App\Models\UserLogin;
+use App\Services\ReferralCommissionService;
+use App\Support\AdminAudit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -19,17 +23,7 @@ class ReportController extends Controller
             ->orderBy('remark')
             ->pluck('remark');
 
-        $transactions = Transaction::with('user')
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->string('search')->toString();
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('trx', 'like', "%{$search}%")
-                        ->orWhere('details', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->filled('trx_type'), fn ($query) => $query->where('trx_type', $request->trx_type))
-            ->when($request->filled('remark'), fn ($query) => $query->where('remark', $request->remark))
+        $transactions = $this->transactionQuery($request)
             ->latest()
             ->paginate(25)
             ->withQueryString();
@@ -41,18 +35,51 @@ class ReportController extends Controller
         ]);
     }
 
-    public function investments(Request $request)
+    public function transactionsExport(Request $request)
     {
-        $investments = Investment::with(['user', 'plan'])
+        $transactions = $this->transactionQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($transactions) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['TRX', 'User', 'Email', 'Type', 'Amount', 'Charge', 'Post Balance', 'Remark', 'Details', 'Date']);
+
+            foreach ($transactions as $trx) {
+                fputcsv($handle, [
+                    $trx->trx,
+                    optional($trx->user)->username,
+                    optional($trx->user)->email,
+                    $trx->trx_type,
+                    $trx->amount,
+                    $trx->charge,
+                    $trx->post_balance,
+                    $trx->remark,
+                    $trx->details,
+                    optional($trx->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, 'transactions-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    protected function transactionQuery(Request $request)
+    {
+        return Transaction::with('user')
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->toString();
                 $query->where(function ($inner) use ($search) {
                     $inner->where('trx', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"))
-                        ->orWhereHas('plan', fn ($plan) => $plan->where('name', 'like', "%{$search}%"));
+                        ->orWhere('details', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
                 });
             })
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')))
+            ->when($request->filled('trx_type'), fn ($query) => $query->where('trx_type', $request->trx_type))
+            ->when($request->filled('remark'), fn ($query) => $query->where('remark', $request->remark));
+    }
+
+    public function investments(Request $request)
+    {
+        $investments = $this->investmentQuery($request)
             ->latest()
             ->paginate(25)
             ->withQueryString();
@@ -63,18 +90,116 @@ class ReportController extends Controller
         ]);
     }
 
-    public function logins(Request $request)
+    public function investmentsExport(Request $request)
     {
-        $logins = UserLogin::with('user')
+        $investments = $this->investmentQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($investments) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['TRX', 'User', 'Email', 'Plan', 'Amount', 'Interest', 'Total Return', 'Paid', 'Status', 'Approved At', 'Rejected At', 'Reject Reason', 'Date']);
+
+            foreach ($investments as $investment) {
+                fputcsv($handle, [
+                    $investment->trx,
+                    optional($investment->user)->username,
+                    optional($investment->user)->email,
+                    optional($investment->plan)->name,
+                    $investment->amount,
+                    $investment->interest_amount,
+                    $investment->total_return,
+                    $investment->total_paid,
+                    $this->investmentStatusLabel((int) $investment->status),
+                    optional($investment->approved_at)->toDateTimeString(),
+                    optional($investment->rejected_at)->toDateTimeString(),
+                    $investment->rejection_reason,
+                    optional($investment->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, 'investments-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    public function approveInvestment(Investment $investment)
+    {
+        abort_unless($investment->status == Status::INVESTMENT_PENDING, 422);
+
+        $commissionCount = DB::transaction(function () use ($investment) {
+            $investment->status = Status::RUNNING;
+            $investment->approved_at = now();
+            $investment->approved_by = auth('admin')->id();
+            $investment->rejected_at = null;
+            $investment->rejection_reason = null;
+            $investment->save();
+
+            return app(ReferralCommissionService::class)->payForInvestment($investment);
+        });
+
+        AdminAudit::record('investment.approved', $investment, [
+            'trx' => $investment->trx,
+            'amount' => $investment->amount,
+            'commission_levels_paid' => $commissionCount,
+        ]);
+
+        return back()->with('status', "Investment approved. {$commissionCount} referral commission level(s) paid.");
+    }
+
+    public function rejectInvestment(Request $request, Investment $investment)
+    {
+        abort_unless($investment->status == Status::INVESTMENT_PENDING, 422);
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($investment, $validated) {
+            $investment->status = Status::INVESTMENT_REJECTED;
+            $investment->rejected_at = now();
+            $investment->rejection_reason = $validated['reason'];
+            $investment->save();
+
+            $user = $investment->user;
+            $user->balance += $investment->amount;
+            $user->save();
+
+            $transaction = new Transaction();
+            $transaction->user_id = $investment->user_id;
+            $transaction->amount = $investment->amount;
+            $transaction->post_balance = $user->balance;
+            $transaction->charge = 0;
+            $transaction->trx_type = '+';
+            $transaction->remark = 'invest_reject';
+            $transaction->details = 'Refunded package purchase request: ' . $validated['reason'];
+            $transaction->trx = $investment->trx;
+            $transaction->save();
+        });
+
+        AdminAudit::record('investment.rejected', $investment, [
+            'trx' => $investment->trx,
+            'amount' => $investment->amount,
+            'reason' => $validated['reason'],
+        ]);
+
+        return back()->with('status', 'Investment rejected and balance refunded.');
+    }
+
+    protected function investmentQuery(Request $request)
+    {
+        return Investment::with(['user', 'plan'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->toString();
                 $query->where(function ($inner) use ($search) {
-                    $inner->where('user_ip', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%")
-                        ->orWhere('country', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
+                    $inner->where('trx', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"))
+                        ->orWhereHas('plan', fn ($plan) => $plan->where('name', 'like', "%{$search}%"));
                 });
             })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')));
+    }
+
+    public function logins(Request $request)
+    {
+        $logins = $this->loginQuery($request)
             ->latest()
             ->paginate(25)
             ->withQueryString();
@@ -83,6 +208,46 @@ class ReportController extends Controller
             'pageTitle' => 'Login Reports',
             'logins' => $logins,
         ]);
+    }
+
+    public function loginsExport(Request $request)
+    {
+        $logins = $this->loginQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($logins) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['User', 'Email', 'IP', 'City', 'Country', 'Country Code', 'Browser', 'OS', 'Date']);
+
+            foreach ($logins as $login) {
+                fputcsv($handle, [
+                    optional($login->user)->username,
+                    optional($login->user)->email,
+                    $login->user_ip,
+                    $login->city,
+                    $login->country,
+                    $login->country_code,
+                    $login->browser,
+                    $login->os,
+                    optional($login->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, 'login-history-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    protected function loginQuery(Request $request)
+    {
+        return UserLogin::with('user')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('user_ip', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('country', 'like', "%{$search}%")
+                        ->orWhereHas('user', fn ($user) => $user->where('username', 'like', "%{$search}%"));
+                });
+            });
     }
 
     public function audits(Request $request)
@@ -105,5 +270,16 @@ class ReportController extends Controller
             'pageTitle' => 'Admin Audit Logs',
             'audits' => $audits,
         ]);
+    }
+
+    protected function investmentStatusLabel(int $status): string
+    {
+        return match ($status) {
+            Status::INVESTMENT_PENDING => 'Pending',
+            Status::RUNNING => 'Running',
+            Status::COMPLETED => 'Completed',
+            Status::INVESTMENT_REJECTED => 'Rejected',
+            default => 'Unknown',
+        };
     }
 }

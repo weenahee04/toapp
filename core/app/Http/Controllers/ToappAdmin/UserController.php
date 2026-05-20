@@ -17,7 +17,48 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::query()
+        $users = $this->userQuery($request)
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('toapp_admin.users.index', [
+            'pageTitle' => 'Users',
+            'users' => $users,
+        ]);
+    }
+
+    public function export(Request $request)
+    {
+        $users = $this->userQuery($request)->latest()->get();
+
+        return response()->streamDownload(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Username', 'Name', 'Email', 'Mobile', 'Balance', 'Status', 'Approval', 'KYC', 'Referrer ID', 'Referral Code', 'Joined']);
+
+            foreach ($users as $user) {
+                fputcsv($handle, [
+                    $user->username,
+                    trim($user->firstname . ' ' . $user->lastname),
+                    $user->email,
+                    $user->dial_code . $user->mobile,
+                    $user->balance,
+                    $user->status ? 'Active' : 'Banned',
+                    $user->approval_status ?? 'approved',
+                    [0 => 'Unverified', 1 => 'Verified', 2 => 'Pending'][$user->kv] ?? $user->kv,
+                    $user->ref_by,
+                    $user->refno,
+                    optional($user->created_at)->toDateTimeString(),
+                ]);
+            }
+
+            fclose($handle);
+        }, 'users-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    protected function userQuery(Request $request)
+    {
+        return User::query()
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->toString();
                 $query->where(function ($inner) use ($search) {
@@ -29,15 +70,7 @@ class UserController extends Controller
             })
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')))
             ->when($request->filled('approval'), fn ($query) => $query->where('approval_status', $request->approval))
-            ->when($request->filled('kyc'), fn ($query) => $query->where('kv', $request->integer('kyc')))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
-
-        return view('toapp_admin.users.index', [
-            'pageTitle' => 'Users',
-            'users' => $users,
-        ]);
+            ->when($request->filled('kyc'), fn ($query) => $query->where('kv', $request->integer('kyc')));
     }
 
     public function show(User $user)

@@ -476,10 +476,8 @@ class UserController extends Controller
         $newInvest->interest_amount  = $interest;
         $newInvest->total_return     = $plan->total_return;
         $newInvest->next_return_date = $nextReturn;
-        $newInvest->status           = Status::RUNNING;
+        $newInvest->status           = Status::INVESTMENT_PENDING;
         $newInvest->save();
-
-        $commissionCount = app(ReferralCommissionService::class)->payForInvestment($newInvest);
 
         $transaction               = new Transaction();
         $transaction->user_id      = $user->id;
@@ -487,15 +485,15 @@ class UserController extends Controller
         $transaction->post_balance = $user->balance;
         $transaction->charge       = 0;
         $transaction->trx_type     = '-';
-        $transaction->remark       = 'invest';
-        $transaction->details      = 'Invest on ' . $plan->name;
+        $transaction->remark       = 'invest_pending';
+        $transaction->details      = 'Package purchase request for ' . $plan->name . ' is waiting for admin approval';
         $transaction->trx          = $newInvest->trx;
         $transaction->save();
 
         $adminNotification            = new AdminNotification();
         $adminNotification->user_id   = $user->id;
-        $adminNotification->title     = 'New Investment In ' . $plan->name . ' from ' . $user->username;
-        $adminNotification->click_url = urlPath('admin.users.investment', $user->id);
+        $adminNotification->title     = 'Package purchase waiting approval: ' . $plan->name . ' from ' . $user->username;
+        $adminNotification->click_url = url('/admin/reports/investments?status=' . Status::INVESTMENT_PENDING);
         $adminNotification->save();
 
         $general = gs();
@@ -511,12 +509,7 @@ class UserController extends Controller
             'total_return' => $newInvest->total_return
         ]);
 
-        $message = 'Invested successfully';
-        if ($commissionCount > 0) {
-            $message .= " and {$commissionCount} referral commission level(s) were paid";
-        }
-
-        $notify[] = ['success', $message];
+        $notify[] = ['success', 'Package purchase submitted. Your balance is reserved and admin will review it before activation.'];
         return redirect()->route('user.investment.log')->withNotify($notify);
     }
 

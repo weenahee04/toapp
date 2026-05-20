@@ -18,6 +18,11 @@
         <small>{{ number_format($stats['running_investments']) }} running investments</small>
     </article>
     <article class="ta-stat is-warning">
+        <span>Pending Packages</span>
+        <strong>{{ number_format($stats['pending_investments']) }}</strong>
+        <small>Package purchases to approve</small>
+    </article>
+    <article class="ta-stat is-warning">
         <span>Pending Deposits</span>
         <strong>{{ number_format($stats['pending_deposits']) }}</strong>
         <small>{{ number_format($stats['total_deposited'], 2) }} total deposited</small>

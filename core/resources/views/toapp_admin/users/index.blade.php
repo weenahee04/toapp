@@ -34,6 +34,7 @@
             </select>
         </label>
         <button class="ta-secondary-btn" type="submit"><i class="las la-search"></i> Filter</button>
+        <a class="ta-secondary-btn" href="{{ route('toapp.admin.users.export', request()->query()) }}"><i class="las la-file-csv"></i> Export CSV</a>
     </form>
 
     <div class="ta-table-wrap">

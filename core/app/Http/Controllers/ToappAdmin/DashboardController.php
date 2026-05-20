@@ -21,6 +21,7 @@ class DashboardController extends Controller
             'pending_users' => User::approvalPending()->count(),
             'active_users' => User::active()->count(),
             'plans' => Plan::count(),
+            'pending_investments' => Investment::where('status', Status::INVESTMENT_PENDING)->count(),
             'running_investments' => Investment::where('status', Status::RUNNING)->count(),
             'pending_deposits' => Deposit::pending()->count(),
             'pending_withdrawals' => Withdrawal::pending()->count(),

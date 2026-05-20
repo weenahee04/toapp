@@ -434,6 +434,57 @@
             letter-spacing: .06em;
         }
 
+        .app-form-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .app-field {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .app-field span {
+            color: var(--to-muted);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .app-field small {
+            color: var(--to-muted);
+            font-size: 12px;
+        }
+
+        .app-password-field {
+            position: relative;
+        }
+
+        .app-password-field input {
+            padding-right: 52px;
+        }
+
+        .app-password-field button {
+            position: absolute;
+            right: 8px;
+            bottom: 4px;
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 14px;
+            color: var(--to-blue);
+            background: rgba(18, 104, 243, .08);
+            font-size: 20px;
+        }
+
+        .app-method-card {
+            height: 100%;
+        }
+
         .app-pills {
             display: flex;
             flex-wrap: wrap;

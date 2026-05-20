@@ -14,6 +14,7 @@
         <label class="ta-field compact"><span>Type</span><select name="trx_type"><option value="">Any</option><option value="+" @selected(request('trx_type') === '+')>Credit</option><option value="-" @selected(request('trx_type') === '-')>Debit</option></select></label>
         <label class="ta-field compact"><span>Remark</span><select name="remark"><option value="">Any</option>@foreach($remarks as $remark)<option value="{{ $remark }}" @selected(request('remark') === $remark)>{{ $remark }}</option>@endforeach</select></label>
         <button class="ta-secondary-btn" type="submit"><i class="las la-filter"></i> Filter</button>
+        <a class="ta-secondary-btn" href="{{ route('toapp.admin.reports.transactions.export', request()->query()) }}"><i class="las la-file-csv"></i> Export CSV</a>
     </form>
     <div class="ta-table-wrap">
         <table class="ta-table">
