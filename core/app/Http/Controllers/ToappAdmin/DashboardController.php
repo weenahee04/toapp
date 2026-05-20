@@ -6,6 +6,7 @@ use App\Constants\Status;
 use App\Models\Deposit;
 use App\Models\Investment;
 use App\Models\Plan;
+use App\Models\ReferralCommission;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Withdrawal;
@@ -17,6 +18,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'users' => User::count(),
+            'pending_users' => User::approvalPending()->count(),
             'active_users' => User::active()->count(),
             'plans' => Plan::count(),
             'running_investments' => Investment::where('status', Status::RUNNING)->count(),
@@ -24,6 +26,7 @@ class DashboardController extends Controller
             'pending_withdrawals' => Withdrawal::pending()->count(),
             'total_deposited' => Deposit::successful()->sum('amount'),
             'total_withdrawn' => Withdrawal::approved()->sum('amount'),
+            'referral_paid' => ReferralCommission::sum('amount'),
         ];
 
         $recentUsers = User::latest()->take(6)->get();

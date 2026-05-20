@@ -704,6 +704,10 @@ body {
     border-top-color: var(--ta-danger);
 }
 
+.ta-stat.is-success {
+    border-top-color: #2f9e6f;
+}
+
 .ta-stat span,
 .ta-stat small {
     color: var(--ta-muted);
@@ -800,6 +804,11 @@ body {
 .ta-badge.danger {
     color: #8b2525;
     background: #fae3e3;
+}
+
+.ta-badge.warning {
+    color: #7a4d00;
+    background: #fff1cc;
 }
 
 .ta-badge.muted {

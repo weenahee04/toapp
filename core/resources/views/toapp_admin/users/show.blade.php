@@ -5,7 +5,7 @@
     <article class="ta-stat"><span>Balance</span><strong>{{ number_format((float) $user->balance, 2) }}</strong><small>Current wallet</small></article>
     <article class="ta-stat"><span>Total Deposit</span><strong>{{ number_format((float) $totalDeposit, 2) }}</strong><small>Successful only</small></article>
     <article class="ta-stat is-danger"><span>Total Withdraw</span><strong>{{ number_format((float) $totalWithdrawals, 2) }}</strong><small>Approved only</small></article>
-    <article class="ta-stat is-warning"><span>Plan</span><strong>{{ $user->plan_id }}</strong><small>{{ $user->role ?: 'No role label' }}</small></article>
+    <article class="ta-stat is-warning"><span>Referral Earned</span><strong>{{ number_format((float) $totalReferralCommission, 2) }}</strong><small>{{ $directReferralCount }} direct referrals</small></article>
 </section>
 
 <section class="ta-grid ta-grid-main">
@@ -20,13 +20,34 @@
             <div><span>Mobile</span><strong>{{ $user->dial_code }}{{ $user->mobile }}</strong></div>
             <div><span>Country</span><strong>{{ $user->country_name ?: '-' }}</strong></div>
             <div><span>Status</span><strong>{{ $user->status ? 'Active' : 'Banned' }}</strong></div>
+            <div><span>Approval</span><strong>{{ ucfirst($user->approval_status ?? 'approved') }}</strong></div>
+            <div><span>Referrer</span><strong>{{ $referrer?->username ?? '-' }}</strong></div>
+            <div><span>Referral Code</span><strong>{{ $user->refno ?: '-' }}</strong></div>
             <div><span>Ban reason</span><strong>{{ $user->ban_reason ?: '-' }}</strong></div>
+            @if($user->rejection_reason)
+                <div><span>Reject reason</span><strong>{{ $user->rejection_reason }}</strong></div>
+            @endif
         </div>
     </article>
 
     <article class="ta-panel">
         <div class="ta-panel-head"><div><span class="ta-kicker">Controls</span><h2>Account Actions</h2></div><i class="las la-user-shield"></i></div>
         <div class="ta-form-stack">
+            @if(($user->approval_status ?? 'approved') !== 'approved')
+                <form method="POST" action="{{ route('toapp.admin.users.approve', $user) }}">
+                    @csrf
+                    <button class="ta-primary-btn" type="submit">Approve Member</button>
+                </form>
+            @endif
+
+            @if(($user->approval_status ?? 'approved') !== 'rejected')
+                <form method="POST" action="{{ route('toapp.admin.users.reject', $user) }}">
+                    @csrf
+                    <label class="ta-field"><span>Reject reason</span><textarea name="reason" rows="3" required maxlength="1000" placeholder="Explain why this member cannot be approved yet"></textarea></label>
+                    <button class="ta-danger-btn" type="submit">Reject Member</button>
+                </form>
+            @endif
+
             <form method="POST" action="{{ route('toapp.admin.users.verification', $user) }}">
                 @csrf
                 <div class="ta-toggle-row">

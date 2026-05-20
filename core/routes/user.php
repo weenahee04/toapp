@@ -55,6 +55,10 @@ Route::name('user.')->group(function(){
 });
 
 Route::middleware('auth')->name('user.')->group(function () {
+    Route::middleware('registration.complete')->namespace('User')->controller('UserController')->group(function () {
+        Route::get('approval-pending', 'approvalPending')->name('approval.pending');
+    });
+
     //authorization
     Route::middleware('registration.complete')->namespace('User')->controller('AuthorizationController')->group(function () {
         Route::get('authorization', 'authorizeForm')->name('authorization');

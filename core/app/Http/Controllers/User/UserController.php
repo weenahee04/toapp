@@ -17,8 +17,10 @@ use App\Models\Investment;
 use App\Models\Plan;
 use App\Models\Year;
 use App\Models\Referral;
+use App\Models\ReferralCommission;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\ReferralCommissionService;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Withdrawal;
 use Carbon\Carbon;
@@ -30,6 +32,14 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
+    public function approvalPending()
+    {
+        $pageTitle = 'Account Approval';
+        $user = auth()->user();
+
+        return view('Template::user.approval_pending', compact('pageTitle', 'user'));
+    }
+
     public function home()
     {
         $pageTitle     = 'Dashboard';
@@ -43,6 +53,12 @@ class UserController extends Controller
         $runningInvestmentCount = (clone $runningInvestments)->count();
         $nextReturnDate = (clone $runningInvestments)->orderBy('next_return_date')->value('next_return_date');
         $directReferralCount = User::where('ref_by', $user->id)->count();
+        $totalReferralCommission = ReferralCommission::where('earner_user_id', $user->id)->sum('amount');
+        $recentReferralCommissions = ReferralCommission::with(['sourceUser', 'plan'])
+            ->where('earner_user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
         $referralCode = $user->refno ?: $user->username;
         $referralLink = route('home', ['reference' => $referralCode]);
 
@@ -57,6 +73,8 @@ class UserController extends Controller
             'runningInvestmentCount',
             'nextReturnDate',
             'directReferralCount',
+            'totalReferralCommission',
+            'recentReferralCommissions',
             'referralCode',
             'referralLink'
         ));
@@ -431,6 +449,8 @@ class UserController extends Controller
         $newInvest->status           = Status::RUNNING;
         $newInvest->save();
 
+        $commissionCount = app(ReferralCommissionService::class)->payForInvestment($newInvest);
+
         $transaction               = new Transaction();
         $transaction->user_id      = $user->id;
         $transaction->amount       = $request->amount;
@@ -461,7 +481,12 @@ class UserController extends Controller
             'total_return' => $newInvest->total_return
         ]);
 
-        $notify[] = ['success', 'Invested successfully'];
+        $message = 'Invested successfully';
+        if ($commissionCount > 0) {
+            $message .= " and {$commissionCount} referral commission level(s) were paid";
+        }
+
+        $notify[] = ['success', $message];
         return redirect()->route('user.investment.log')->withNotify($notify);
     }
 

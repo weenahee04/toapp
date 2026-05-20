@@ -6,6 +6,7 @@ use App\Constants\Status;
 use App\Models\Deposit;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\ReferralCommission;
 use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -26,6 +27,7 @@ class UserController extends Controller
                 });
             })
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->integer('status')))
+            ->when($request->filled('approval'), fn ($query) => $query->where('approval_status', $request->approval))
             ->when($request->filled('kyc'), fn ($query) => $query->where('kv', $request->integer('kyc')))
             ->latest()
             ->paginate(20)
@@ -44,8 +46,38 @@ class UserController extends Controller
             'user' => $user,
             'totalDeposit' => Deposit::where('user_id', $user->id)->successful()->sum('amount'),
             'totalWithdrawals' => Withdrawal::where('user_id', $user->id)->approved()->sum('amount'),
+            'directReferralCount' => User::where('ref_by', $user->id)->count(),
+            'referrer' => $user->referrer,
+            'totalReferralCommission' => ReferralCommission::where('earner_user_id', $user->id)->sum('amount'),
             'transactions' => Transaction::where('user_id', $user->id)->latest()->take(10)->get(),
         ]);
+    }
+
+    public function approve(User $user)
+    {
+        $user->approval_status = 'approved';
+        $user->approved_at = now();
+        $user->approved_by = auth('admin')->id();
+        $user->rejected_at = null;
+        $user->rejection_reason = null;
+        $user->status = Status::USER_ACTIVE;
+        $user->save();
+
+        return back()->with('status', 'Member approved successfully.');
+    }
+
+    public function reject(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $user->approval_status = 'rejected';
+        $user->rejected_at = now();
+        $user->rejection_reason = $validated['reason'];
+        $user->save();
+
+        return back()->with('status', 'Member rejected successfully.');
     }
 
     public function status(Request $request, User $user)

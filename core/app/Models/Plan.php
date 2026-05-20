@@ -9,5 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class Plan extends Model
 {
     use GlobalStatus;
+
+    public function referralRules()
+    {
+        return $this->hasMany(Referral::class);
+    }
     
 }

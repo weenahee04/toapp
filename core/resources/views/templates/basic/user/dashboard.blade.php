@@ -186,6 +186,33 @@
                                 @lang('My network')
                             </a>
                         </div>
+
+                        <div class="app-list-card mt-3">
+                            <div class="app-list-item">
+                                <span class="app-list-icon"><i class="las la-coins"></i></span>
+                                <div class="app-list-body">
+                                    <strong>{{ showAmount($totalReferralCommission) }}</strong>
+                                    <span>@lang('Total referral commission earned')</span>
+                                </div>
+                            </div>
+                            @forelse($recentReferralCommissions as $commission)
+                                <div class="app-list-item">
+                                    <span class="app-list-icon"><i class="las la-level-up-alt"></i></span>
+                                    <div class="app-list-body">
+                                        <strong>+{{ showAmount($commission->amount) }} · Level {{ $commission->level }}</strong>
+                                        <span>{{ optional($commission->sourceUser)->username ?? __('Member') }} · {{ optional($commission->plan)->name ?? __('Package') }}</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="app-list-item">
+                                    <span class="app-list-icon"><i class="las la-seedling"></i></span>
+                                    <div class="app-list-body">
+                                        <strong>@lang('No commission yet')</strong>
+                                        <span>@lang('Commissions appear here after referred members buy packages.')</span>
+                                    </div>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>

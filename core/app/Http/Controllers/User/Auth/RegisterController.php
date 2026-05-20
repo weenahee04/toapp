@@ -189,6 +189,11 @@ class RegisterController extends Controller
         $user->ref_by    = $referUser ? $referUser->id : 0;
         $user->kv = gs('kv') ? Status::NO : Status::YES;
         $user->refno = Str::random(6);;
+        $user->approval_status = 'pending';
+        $user->approved_at = null;
+        $user->approved_by = null;
+        $user->rejected_at = null;
+        $user->rejection_reason = null;
         $user->ev = 1;
         $user->sv = 1;
         $user->ts = Status::DISABLE;
@@ -197,8 +202,8 @@ class RegisterController extends Controller
 
         $adminNotification            = new AdminNotification();
         $adminNotification->user_id   = $user->id;
-        $adminNotification->title     = 'New member registered';
-        $adminNotification->click_url = urlPath('admin.users.detail', $user->id);
+        $adminNotification->title     = 'New member waiting for approval';
+        $adminNotification->click_url = url('/admin/users/' . $user->id);
         $adminNotification->save();
 
 

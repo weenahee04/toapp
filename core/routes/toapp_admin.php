@@ -6,6 +6,7 @@ use App\Http\Controllers\ToappAdmin\DepositController;
 use App\Http\Controllers\ToappAdmin\MethodController;
 use App\Http\Controllers\ToappAdmin\PlanController;
 use App\Http\Controllers\ToappAdmin\ReadinessController;
+use App\Http\Controllers\ToappAdmin\ReferralController;
 use App\Http\Controllers\ToappAdmin\ReportController;
 use App\Http\Controllers\ToappAdmin\SettingController;
 use App\Http\Controllers\ToappAdmin\SupportController;
@@ -26,6 +27,8 @@ Route::middleware('toapp.admin')->group(function () {
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::post('/users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
+    Route::post('/users/{user}/reject', [UserController::class, 'reject'])->name('users.reject');
     Route::post('/users/{user}/status', [UserController::class, 'status'])->name('users.status');
     Route::post('/users/{user}/verification', [UserController::class, 'verification'])->name('users.verification');
     Route::post('/users/{user}/balance', [UserController::class, 'balance'])->name('users.balance');
@@ -48,6 +51,10 @@ Route::middleware('toapp.admin')->group(function () {
     Route::get('/reports/transactions', [ReportController::class, 'transactions'])->name('reports.transactions');
     Route::get('/reports/investments', [ReportController::class, 'investments'])->name('reports.investments');
     Route::get('/reports/logins', [ReportController::class, 'logins'])->name('reports.logins');
+
+    Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
+    Route::post('/referrals/rules', [ReferralController::class, 'storeRule'])->name('referrals.rules.store');
+    Route::delete('/referrals/rules/{referral}', [ReferralController::class, 'destroyRule'])->name('referrals.rules.destroy');
 
     Route::get('/support', [SupportController::class, 'index'])->name('support.index');
     Route::get('/support/{ticket}', [SupportController::class, 'show'])->name('support.show');

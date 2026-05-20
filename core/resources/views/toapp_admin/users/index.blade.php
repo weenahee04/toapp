@@ -16,6 +16,15 @@
             </select>
         </label>
         <label class="ta-field compact">
+            <span>Approval</span>
+            <select name="approval">
+                <option value="">Any</option>
+                <option value="pending" @selected(request('approval') === 'pending')>Pending</option>
+                <option value="approved" @selected(request('approval') === 'approved')>Approved</option>
+                <option value="rejected" @selected(request('approval') === 'rejected')>Rejected</option>
+            </select>
+        </label>
+        <label class="ta-field compact">
             <span>KYC</span>
             <select name="kyc">
                 <option value="">Any</option>
@@ -53,6 +62,8 @@
                         <td>{{ number_format((float) $user->balance, 2) }}</td>
                         <td>
                             <span class="ta-badge {{ $user->status ? 'success' : 'danger' }}">{{ $user->status ? 'Active' : 'Banned' }}</span>
+                            @php($approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning'))
+                            <span class="ta-badge {{ $approvalClass }}">{{ ucfirst($user->approval_status ?? 'approved') }}</span>
                             <span class="ta-badge {{ $user->kv == 1 ? 'success' : 'muted' }}">KYC {{ $user->kv == 1 ? 'OK' : ($user->kv == 2 ? 'Pending' : 'No') }}</span>
                         </td>
                         <td>{{ optional($user->created_at)->format('M d, Y') }}</td>

@@ -7,6 +7,11 @@
         <strong>{{ number_format($stats['users']) }}</strong>
         <small>{{ number_format($stats['active_users']) }} active</small>
     </article>
+    <article class="ta-stat is-warning">
+        <span>Pending Approval</span>
+        <strong>{{ number_format($stats['pending_users']) }}</strong>
+        <small>New members to review</small>
+    </article>
     <article class="ta-stat">
         <span>Plans</span>
         <strong>{{ number_format($stats['plans']) }}</strong>
@@ -21,6 +26,11 @@
         <span>Pending Withdrawals</span>
         <strong>{{ number_format($stats['pending_withdrawals']) }}</strong>
         <small>{{ number_format($stats['total_withdrawn'], 2) }} total withdrawn</small>
+    </article>
+    <article class="ta-stat is-success">
+        <span>Referral Paid</span>
+        <strong>{{ number_format($stats['referral_paid'], 2) }}</strong>
+        <small>Commission ledger</small>
     </article>
 </section>
 
@@ -51,7 +61,11 @@
                                 <small>{{ '@' . $user->username }}</small>
                             </td>
                             <td>{{ $user->email }}</td>
-                            <td><span class="ta-badge {{ $user->status ? 'success' : 'danger' }}">{{ $user->status ? 'Active' : 'Banned' }}</span></td>
+                            <td>
+                                <span class="ta-badge {{ $user->status ? 'success' : 'danger' }}">{{ $user->status ? 'Active' : 'Banned' }}</span>
+                                @php($approvalClass = $user->approval_status === 'approved' ? 'success' : ($user->approval_status === 'rejected' ? 'danger' : 'warning'))
+                                <span class="ta-badge {{ $approvalClass }}">{{ ucfirst($user->approval_status ?? 'approved') }}</span>
+                            </td>
                             <td>{{ optional($user->created_at)->format('M d, Y') }}</td>
                         </tr>
                     @empty

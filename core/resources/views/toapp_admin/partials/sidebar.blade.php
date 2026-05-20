@@ -32,6 +32,10 @@
             <i class="las la-chart-line"></i>
             <span>Reports</span>
         </a>
+        <a class="{{ request()->routeIs('toapp.admin.referrals.*') ? 'active' : '' }}" href="{{ route('toapp.admin.referrals.index') }}">
+            <i class="las la-sitemap"></i>
+            <span>Referrals</span>
+        </a>
         <a class="{{ request()->routeIs('toapp.admin.support.*') ? 'active' : '' }}" href="{{ route('toapp.admin.support.index') }}">
             <i class="las la-headset"></i>
             <span>Support</span>

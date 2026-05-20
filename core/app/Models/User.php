@@ -54,6 +54,21 @@ class User extends Authenticatable
         return $this->hasMany(Withdrawal::class)->where('status','!=',Status::PAYMENT_INITIATE);
     }
 
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'ref_by');
+    }
+
+    public function directReferrals()
+    {
+        return $this->hasMany(User::class, 'ref_by');
+    }
+
+    public function referralCommissions()
+    {
+        return $this->hasMany(ReferralCommission::class, 'earner_user_id');
+    }
+
     public function tickets()
     {
         return $this->hasMany(SupportTicket::class);
@@ -76,7 +91,17 @@ class User extends Authenticatable
     // SCOPES
     public function scopeActive($query)
     {
-        return $query->where('status', Status::USER_ACTIVE)->where('ev',Status::VERIFIED)->where('sv',Status::VERIFIED);
+        return $query->where('status', Status::USER_ACTIVE)->where('approval_status', 'approved')->where('ev',Status::VERIFIED)->where('sv',Status::VERIFIED);
+    }
+
+    public function scopeApprovalPending($query)
+    {
+        return $query->where('approval_status', 'pending');
+    }
+
+    public function scopeApprovalRejected($query)
+    {
+        return $query->where('approval_status', 'rejected');
     }
 
     public function scopeBanned($query)
