@@ -4,6 +4,7 @@
             .auth-surface {
                 min-height: 100vh;
                 padding: 24px 16px 40px;
+                overflow-x: hidden;
                 background:
                     linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(242, 250, 253, 0.92) 54%, rgba(228, 245, 241, 0.92) 100%),
                     url("{{ asset('assets/global/img/bg-app.png') }}") center top / cover no-repeat;
@@ -13,6 +14,11 @@
             .auth-shell {
                 width: min(100%, 430px);
                 margin: 0 auto;
+            }
+
+            .auth-shell *,
+            .auth-app-modal * {
+                min-width: 0;
             }
 
             .auth-topbar {
@@ -378,17 +384,66 @@
 
             @media (max-width: 575px) {
                 .auth-surface {
-                    padding: 18px 12px 32px;
+                    min-height: 100svh;
+                    padding: 14px 10px 28px;
+                }
+
+                .auth-topbar {
+                    position: sticky;
+                    top: 8px;
+                    z-index: 10;
+                    min-height: 40px;
+                    margin-bottom: 12px;
+                }
+
+                .auth-back {
+                    width: 40px;
+                    height: 40px;
                 }
 
                 .auth-card__header,
                 .auth-card__body {
-                    padding-left: 18px;
-                    padding-right: 18px;
+                    padding-left: 16px;
+                    padding-right: 16px;
                 }
 
                 .auth-title {
                     font-size: 24px;
+                }
+
+                .auth-copy {
+                    font-size: 13px;
+                }
+
+                .auth-choice-grid,
+                .auth-date-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .auth-control,
+                .auth-select,
+                .auth-submit,
+                .auth-choice {
+                    min-height: 50px;
+                    font-size: 14px;
+                }
+
+                .auth-app-modal .modal-dialog {
+                    margin: 12px;
+                }
+            }
+
+            @media (max-width: 380px) {
+                .auth-brand img {
+                    max-height: 46px;
+                }
+
+                .auth-card__header {
+                    padding-top: 18px;
+                }
+
+                .auth-card__body {
+                    padding-bottom: 18px;
                 }
             }
         </style>

@@ -17,6 +17,7 @@
         body {
             background: #e8f2f8;
             color: var(--to-ink);
+            overflow-x: hidden;
         }
 
         .main-wrapper,
@@ -53,6 +54,12 @@
             z-index: 1;
             width: min(100%, 1040px);
             margin: 0 auto;
+        }
+
+        img,
+        svg,
+        video {
+            max-width: 100%;
         }
 
         .app-topbar,
@@ -184,6 +191,7 @@
             border-radius: 16px;
             font-weight: 800;
             letter-spacing: -.01em;
+            text-align: center;
             transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
         }
 
@@ -335,6 +343,13 @@
             overflow: hidden;
         }
 
+        .app-list-card,
+        .app-card,
+        .app-plan-card,
+        .app-table-shell {
+            min-width: 0;
+        }
+
         .app-list-item {
             display: flex;
             align-items: center;
@@ -408,6 +423,7 @@
         .app-form-control,
         .form--control,
         .form-control {
+            width: 100%;
             min-height: 48px;
             border: 1px solid rgba(15, 23, 42, .1);
             border-radius: 16px;
@@ -838,8 +854,14 @@
         }
 
         .custom--table {
+            min-width: 720px;
             margin: 0;
             color: var(--to-ink);
+        }
+
+        .table-responsive {
+            border-radius: inherit;
+            -webkit-overflow-scrolling: touch;
         }
 
         .custom--table thead th {
@@ -931,19 +953,114 @@
                 padding: 14px 12px 104px;
             }
 
+            .app-container {
+                width: 100%;
+            }
+
+            .app-topbar {
+                position: sticky;
+                top: 8px;
+                z-index: 20;
+                padding: 8px;
+                border: 1px solid rgba(255, 255, 255, .72);
+                border-radius: 22px;
+                background: rgba(247, 251, 255, .78);
+                box-shadow: 0 14px 36px rgba(15, 23, 42, .1);
+            }
+
+            .app-brand span {
+                max-width: 52vw;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .app-brand img {
+                width: 34px;
+                height: 34px;
+                border-radius: 12px;
+            }
+
+            .app-icon-btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 14px;
+            }
+
             .app-hero {
                 padding: 21px;
                 border-radius: 26px;
             }
 
+            .app-hero h1 {
+                font-size: clamp(27px, 10vw, 38px);
+                letter-spacing: -.045em;
+            }
+
+            .app-hero p {
+                font-size: 14px;
+                line-height: 1.55;
+            }
+
             .app-hero-actions .app-btn {
-                flex: 1 1 145px;
+                flex: 1 1 100%;
+                width: 100%;
             }
 
             .app-section-title {
                 align-items: flex-start;
                 flex-direction: column;
                 gap: 8px;
+            }
+
+            .app-section-title h2 {
+                font-size: 18px;
+            }
+
+            .app-stat {
+                min-height: 116px;
+                padding: 14px;
+            }
+
+            .app-stat strong {
+                font-size: 20px;
+                overflow-wrap: anywhere;
+            }
+
+            .app-card {
+                padding: 15px;
+            }
+
+            .app-list-item {
+                align-items: flex-start;
+                gap: 10px;
+                padding: 13px;
+            }
+
+            .app-list-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 13px;
+                font-size: 20px;
+            }
+
+            .app-amount,
+            .app-status-pill {
+                white-space: normal;
+                text-align: right;
+            }
+
+            .app-copy-box {
+                grid-template-columns: 1fr;
+            }
+
+            .app-copy-box .app-icon-btn {
+                width: 100%;
+            }
+
+            .app-plan-card {
+                border-radius: 22px;
+                padding: 15px;
             }
 
             .app-network-ring {
@@ -953,6 +1070,70 @@
             .app-downline-control,
             .app-downline-summary {
                 grid-template-columns: 1fr;
+            }
+
+            .app-modal .modal-dialog,
+            #planModal .modal-dialog,
+            #detailModal .modal-dialog {
+                margin: 12px;
+            }
+
+            .app-modal .modal-body,
+            #planModal .modal-body,
+            #detailModal .modal-body {
+                padding: 16px;
+            }
+
+            .footer-menu {
+                left: 8px;
+                right: 8px;
+                height: 70px;
+                padding: 0 8px;
+                border-radius: 22px 22px 0 0;
+            }
+
+            .footer-menu .link-menu {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .app-page {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .app-hero,
+            .app-card,
+            .app-list-card,
+            .app-table-shell {
+                border-radius: 20px;
+            }
+
+            .app-pills {
+                flex-direction: column;
+            }
+
+            .app-pill {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .app-list-item {
+                flex-wrap: wrap;
+            }
+
+            .app-list-body {
+                flex: 1 1 calc(100% - 50px);
+            }
+
+            .app-amount,
+            .app-status-pill {
+                margin-left: 48px;
+            }
+
+            .custom--table {
+                min-width: 650px;
             }
         }
     </style>

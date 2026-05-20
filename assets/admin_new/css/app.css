@@ -22,6 +22,13 @@ body {
     color: var(--ta-ink);
     background: var(--ta-bg);
     font-family: "Poppins", "Segoe UI", sans-serif;
+    overflow-x: hidden;
+}
+
+img,
+svg,
+video {
+    max-width: 100%;
 }
 
 .ta-auth-body {
@@ -430,6 +437,7 @@ body {
     border-radius: 8px;
     font-weight: 800;
     text-decoration: none;
+    text-align: center;
 }
 
 .ta-secondary-btn {
@@ -535,6 +543,11 @@ body {
     display: grid;
     grid-template-columns: 272px minmax(0, 1fr);
     min-height: 100vh;
+}
+
+.ta-shell *,
+.ta-auth * {
+    min-width: 0;
 }
 
 .ta-sidebar {
@@ -793,10 +806,12 @@ body {
 .ta-table-wrap {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ta-table {
     width: 100%;
+    min-width: 820px;
     border-collapse: collapse;
 }
 
@@ -1232,10 +1247,27 @@ body {
     .ta-sidebar {
         position: static;
         height: auto;
+        padding: 16px;
+        border-radius: 0 0 22px 22px;
     }
 
     .ta-nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
+        gap: 8px;
+        margin-top: 18px;
+        padding-bottom: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .ta-nav a {
+        flex: 0 0 auto;
+        min-width: max-content;
+        padding: 0 12px;
+    }
+
+    .ta-sidebar-note {
+        display: none;
     }
 
     .ta-main,
@@ -1246,6 +1278,21 @@ body {
     .ta-topbar {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .ta-topbar h1 {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    .ta-topbar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .ta-admin-chip {
+        flex: 1 1 100%;
+        justify-content: center;
     }
 
     .ta-grid-stats {
@@ -1262,11 +1309,139 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .ta-toolbar,
+    .ta-toolbar-slim {
+        padding: 14px;
+    }
+
+    .ta-inline-search,
+    .ta-secondary-btn,
+    .ta-danger-btn,
+    .ta-link-btn,
+    .ta-primary-btn {
+        width: 100%;
+    }
+
+    .ta-panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ta-action-stack {
+        min-width: 0;
+    }
+
+    .ta-message {
+        max-width: 100%;
+    }
+
     .ta-auth-copy h1 {
         font-size: 38px;
     }
 
     .ta-login-card {
         padding: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ta-auth {
+        min-height: 100svh;
+        padding: 12px;
+    }
+
+    .ta-auth::after {
+        inset: 8px;
+        border-radius: 20px;
+    }
+
+    .ta-auth-panel {
+        gap: 18px;
+    }
+
+    .ta-auth-brand {
+        margin-bottom: 18px;
+    }
+
+    .ta-auth-copy p,
+    .ta-auth-status,
+    .ta-auth-metrics {
+        display: none;
+    }
+
+    .ta-auth-copy h1 {
+        font-size: 30px;
+        line-height: 1.05;
+    }
+
+    .ta-form-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ta-form-head h2 {
+        font-size: 24px;
+    }
+
+    .ta-login-card {
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .ta-login-options {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ta-secure-note {
+        white-space: normal;
+    }
+
+    .ta-main {
+        padding: 14px;
+    }
+
+    .ta-brand {
+        align-items: flex-start;
+    }
+
+    .ta-brand small {
+        display: none;
+    }
+
+    .ta-nav a span {
+        font-size: 12px;
+    }
+
+    .ta-grid {
+        gap: 12px;
+    }
+
+    .ta-stat {
+        padding: 15px;
+    }
+
+    .ta-stat strong {
+        font-size: 25px;
+        overflow-wrap: anywhere;
+    }
+
+    .ta-table {
+        min-width: 760px;
+    }
+
+    .ta-table th,
+    .ta-table td {
+        padding: 12px 14px;
+    }
+
+    .ta-thread,
+    .ta-method-list,
+    .ta-readiness {
+        padding: 14px;
+    }
+
+    .ta-detail-list > div {
+        padding: 12px;
     }
 }
