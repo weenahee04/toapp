@@ -105,25 +105,27 @@
                     </div>
 
                     <div class="app-list-card">
-                        @forelse ($dashboardTransactions as $trx)
-                            <div class="app-list-item">
-                                <span class="app-list-icon">
-                                    <i class="las {{ $trx->trx_type == '+' ? 'la-plus' : 'la-minus' }}"></i>
-                                </span>
-                                <div class="app-list-body">
-                                    <strong>{{ $trx->details }}</strong>
-                                    <span>{{ showDateTime($trx->created_at, 'M d, Y h:i A') }}</span>
-                                </div>
-                                <div class="app-amount {{ $trx->trx_type == '+' ? 'is-plus' : 'is-minus' }}">
-                                    {{ $trx->trx_type }}{{ showAmount($trx->amount) }}
-                                </div>
-                            </div>
-                        @empty
+                        @if($dashboardTransactions->isEmpty())
                             <div class="app-empty-state">
                                 <i class="las la-receipt d-block fs-1 mb-2"></i>
                                 @lang('No transactions yet. Your first activity will appear here.')
                             </div>
-                        @endforelse
+                        @else
+                            @foreach($dashboardTransactions as $trx)
+                                <div class="app-list-item">
+                                    <span class="app-list-icon">
+                                        <i class="las {{ $trx->trx_type == '+' ? 'la-plus' : 'la-minus' }}"></i>
+                                    </span>
+                                    <div class="app-list-body">
+                                        <strong>{{ $trx->details }}</strong>
+                                        <span>{{ showDateTime($trx->created_at, 'M d, Y h:i A') }}</span>
+                                    </div>
+                                    <div class="app-amount {{ $trx->trx_type == '+' ? 'is-plus' : 'is-minus' }}">
+                                        {{ $trx->trx_type }}{{ showAmount($trx->amount) }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
 
@@ -196,7 +198,8 @@
                                     <span>@lang('Total referral commission earned')</span>
                                 </div>
                             </div>
-                            @forelse($recentReferralCommissions as $commission)
+                            @if($recentReferralCommissions->isNotEmpty())
+                            @foreach($recentReferralCommissions as $commission)
                                 <div class="app-list-item">
                                     <span class="app-list-icon"><i class="las la-level-up-alt"></i></span>
                                     <div class="app-list-body">
@@ -204,7 +207,8 @@
                                         <span>{{ optional($commission->sourceUser)->username ?? __('Member') }} · {{ optional($commission->plan)->name ?? __('Package') }}</span>
                                     </div>
                                 </div>
-                            @empty
+                            @endforeach
+                            @else
                                 <div class="app-list-item">
                                     <span class="app-list-icon"><i class="las la-seedling"></i></span>
                                     <div class="app-list-body">
@@ -212,7 +216,7 @@
                                         <span>@lang('Commissions appear here after referred members buy packages.')</span>
                                     </div>
                                 </div>
-                            @endforelse
+                            @endif
                         </div>
                     </div>
                 </div>
