@@ -87,11 +87,13 @@
                 <div class="app-card app-network-card">
                     <label class="app-field-label" for="network-level">@lang('Network level')</label>
                     <select class="app-form-control" id="network-level">
-                        @forelse($levels as $level)
-                            <option value="{{ $level }}" @selected($level == $initialLevel)>@lang('Level') {{ $level }}</option>
-                        @empty
+                        @if($levels->isNotEmpty())
+                            @foreach($levels as $level)
+                                <option value="{{ $level }}" @selected($level == $initialLevel)>@lang('Level') {{ $level }}</option>
+                            @endforeach
+                        @else
                             <option value="1">@lang('Level') 1</option>
-                        @endforelse
+                        @endif
                     </select>
 
                     <div class="app-network-ring mt-3">
@@ -117,17 +119,19 @@
                 </div>
 
                 <div class="app-list-card">
-                    @forelse($referrals as $rule)
-                        <div class="app-list-item">
-                            <span class="app-list-icon"><i class="las la-percentage"></i></span>
-                            <div class="app-list-body">
-                                <strong>@lang('Level') {{ $rule->level }} - {{ number_format((float) $rule->percent, 2) }}%</strong>
-                                <span>{{ optional($rule->plan)->name ?? __('Global fallback') }}</span>
+                    @if($referrals->isNotEmpty())
+                        @foreach($referrals as $rule)
+                            <div class="app-list-item">
+                                <span class="app-list-icon"><i class="las la-percentage"></i></span>
+                                <div class="app-list-body">
+                                    <strong>@lang('Level') {{ $rule->level }} - {{ number_format((float) $rule->percent, 2) }}%</strong>
+                                    <span>{{ optional($rule->plan)->name ?? __('Global fallback') }}</span>
+                                </div>
                             </div>
-                        </div>
-                    @empty
+                        @endforeach
+                    @else
                         <div class="app-empty-state">@lang('No commission rules are configured yet.')</div>
-                    @endforelse
+                    @endif
                 </div>
             </div>
 
@@ -144,11 +148,13 @@
                         <label class="app-field-label" for="network-level-filter">@lang('Show level')</label>
                         <select class="app-form-control" id="network-level-filter" name="network_level" onchange="this.form.submit()">
                             <option value="">@lang('All levels')</option>
-                            @forelse($levels as $level)
-                                <option value="{{ $level }}" @selected((string) $selectedNetworkLevel === (string) $level)>@lang('Level') {{ $level }}</option>
-                            @empty
+                            @if($levels->isNotEmpty())
+                                @foreach($levels as $level)
+                                    <option value="{{ $level }}" @selected((string) $selectedNetworkLevel === (string) $level)>@lang('Level') {{ $level }}</option>
+                                @endforeach
+                            @else
                                 <option value="1">@lang('Level') 1</option>
-                            @endforelse
+                            @endif
                         </select>
                     </form>
                     <div class="app-downline-summary">
@@ -174,37 +180,39 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($networkMembers as $member)
-                                    @php
-                                        $fullName = trim(($member->firstname ?? '') . ' ' . ($member->lastname ?? ''));
-                                        $approval = $member->approval_status ?: 'approved';
-                                    @endphp
-                                    <tr>
-                                        <td>
-                                            <strong>{{ $member->username }}</strong>
-                                            <span class="d-block text-muted">{{ $fullName ?: $member->email }}</span>
-                                        </td>
-                                        <td><span class="app-status-pill is-level">@lang('Level') {{ $member->level }}</span></td>
-                                        <td>{{ $member->referrer_username ?: '-' }}</td>
-                                        <td>{{ $member->plan_name ?: __('No plan') }}</td>
-                                        <td>
-                                            <span class="app-status-pill {{ (int) $member->status === 1 && $approval === 'approved' ? 'is-active' : ($approval === 'pending' ? 'is-pending' : 'is-muted') }}">
-                                                {{ $approval === 'approved' ? ((int) $member->status === 1 ? __('Active') : __('Disabled')) : __(ucfirst($approval)) }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <strong>{{ showAmount($member->total_commission, 0) }}</strong>
-                                            <span class="d-block text-muted">{{ (int) $member->commission_count }} @lang('records')</span>
-                                        </td>
-                                        <td>{{ showDateTime($member->created_at, 'M d, Y') }}</td>
-                                    </tr>
-                                @empty
+                                @if(count($networkMembers))
+                                    @foreach($networkMembers as $member)
+                                        @php
+                                            $fullName = trim(($member->firstname ?? '') . ' ' . ($member->lastname ?? ''));
+                                            $approval = $member->approval_status ?: 'approved';
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <strong>{{ $member->username }}</strong>
+                                                <span class="d-block text-muted">{{ $fullName ?: $member->email }}</span>
+                                            </td>
+                                            <td><span class="app-status-pill is-level">@lang('Level') {{ $member->level }}</span></td>
+                                            <td>{{ $member->referrer_username ?: '-' }}</td>
+                                            <td>{{ $member->plan_name ?: __('No plan') }}</td>
+                                            <td>
+                                                <span class="app-status-pill {{ (int) $member->status === 1 && $approval === 'approved' ? 'is-active' : ($approval === 'pending' ? 'is-pending' : 'is-muted') }}">
+                                                    {{ $approval === 'approved' ? ((int) $member->status === 1 ? __('Active') : __('Disabled')) : __(ucfirst($approval)) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ showAmount($member->total_commission, 0) }}</strong>
+                                                <span class="d-block text-muted">{{ (int) $member->commission_count }} @lang('records')</span>
+                                            </td>
+                                            <td>{{ showDateTime($member->created_at, 'M d, Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                @else
                                     <tr>
                                         <td colspan="7">
                                             <div class="app-empty-state">@lang('No members found in this referral line yet.')</div>
                                         </td>
                                     </tr>
-                                @endforelse
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -220,20 +228,22 @@
                 </div>
 
                 <div class="app-list-card">
-                    @forelse($directReferrals as $member)
-                        <div class="app-list-item">
-                            <span class="app-list-icon"><i class="las la-user"></i></span>
-                            <div class="app-list-body">
-                                <strong>{{ $member->username }}</strong>
-                                <span>{{ $member->email }} - {{ showDateTime($member->created_at, 'M d, Y') }}</span>
+                    @if($directReferrals->isNotEmpty())
+                        @foreach($directReferrals as $member)
+                            <div class="app-list-item">
+                                <span class="app-list-icon"><i class="las la-user"></i></span>
+                                <div class="app-list-body">
+                                    <strong>{{ $member->username }}</strong>
+                                    <span>{{ $member->email }} - {{ showDateTime($member->created_at, 'M d, Y') }}</span>
+                                </div>
+                                <span class="app-status-pill {{ $member->plan_id ? 'is-active' : 'is-muted' }}">
+                                    {{ $member->plan_id ? __('Active') : __('No plan') }}
+                                </span>
                             </div>
-                            <span class="app-status-pill {{ $member->plan_id ? 'is-active' : 'is-muted' }}">
-                                {{ $member->plan_id ? __('Active') : __('No plan') }}
-                            </span>
-                        </div>
-                    @empty
+                        @endforeach
+                    @else
                         <div class="app-empty-state">@lang('No direct members yet. Share your invite link to start building your network.')</div>
-                    @endforelse
+                    @endif
                 </div>
 
                 <div class="app-section-title">
@@ -244,18 +254,20 @@
                 </div>
 
                 <div class="app-list-card">
-                    @forelse($commissions as $commission)
-                        <div class="app-list-item">
-                            <span class="app-list-icon"><i class="las la-level-up-alt"></i></span>
-                            <div class="app-list-body">
-                                <strong>+{{ showAmount($commission->amount) }} - @lang('Level') {{ $commission->level }}</strong>
-                                <span>{{ optional($commission->sourceUser)->username ?? __('Member') }} - {{ optional($commission->plan)->name ?? __('Package') }} - {{ optional($commission->created_at)->format('M d, Y H:i') }}</span>
+                    @if(count($commissions))
+                        @foreach($commissions as $commission)
+                            <div class="app-list-item">
+                                <span class="app-list-icon"><i class="las la-level-up-alt"></i></span>
+                                <div class="app-list-body">
+                                    <strong>+{{ showAmount($commission->amount) }} - @lang('Level') {{ $commission->level }}</strong>
+                                    <span>{{ optional($commission->sourceUser)->username ?? __('Member') }} - {{ optional($commission->plan)->name ?? __('Package') }} - {{ optional($commission->created_at)->format('M d, Y H:i') }}</span>
+                                </div>
+                                <span class="app-amount is-plus">{{ number_format((float) $commission->percent, 2) }}%</span>
                             </div>
-                            <span class="app-amount is-plus">{{ number_format((float) $commission->percent, 2) }}%</span>
-                        </div>
-                    @empty
+                        @endforeach
+                    @else
                         <div class="app-empty-state">@lang('No commission has been credited yet.')</div>
-                    @endforelse
+                    @endif
                 </div>
 
                 <div class="app-pagination mt-3">{{ $commissions->links() }}</div>
