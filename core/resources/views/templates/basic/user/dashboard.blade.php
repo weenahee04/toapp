@@ -1,6 +1,7 @@
 @extends($activeTemplate . 'layouts.master')
 
 @section('content')
+    @php($dashboardTransactions = $latestTrx->take(4))
     <div class="app-page app-dashboard">
         <div class="app-container">
             <div class="app-topbar">
@@ -104,7 +105,7 @@
                     </div>
 
                     <div class="app-list-card">
-                        @forelse ($latestTrx->take(4) as $trx)
+                        @forelse ($dashboardTransactions as $trx)
                             <div class="app-list-item">
                                 <span class="app-list-icon">
                                     <i class="las {{ $trx->trx_type == '+' ? 'la-plus' : 'la-minus' }}"></i>
