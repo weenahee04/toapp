@@ -105,7 +105,9 @@
                     </div>
 
                     <div class="app-network-split" id="level-user-counts">
-                        @php($initialCounts = $levelCounts->get($initialLevel))
+                        @php
+                            $initialCounts = $levelCounts->get($initialLevel);
+                        @endphp
                         <div><span>@lang('Active')</span><strong>{{ optional($initialCounts)->active_count ?? 0 }}</strong></div>
                         <div><span>@lang('Inactive')</span><strong>{{ optional($initialCounts)->inactive_count ?? 0 }}</strong></div>
                     </div>
